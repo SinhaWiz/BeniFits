@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-# BeniHealth
+# BeniFits
 
 Fullstack web project starter with a React frontend and an Express backend.
 
@@ -22,6 +21,3 @@ From the repository root:
 1. Install dependencies in `client/` and `server/`.
 2. Create your backend routes and data models.
 3. Connect the React app to the API.
-=======
-# BeniFits
->>>>>>> af2b1e1f7389c364c2c3867b4988aba2e20defb7
