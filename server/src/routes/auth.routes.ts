@@ -9,6 +9,7 @@ import {
   verifyRefreshToken,
 } from '../lib/jwt';
 import { prisma } from '../lib/prisma';
+import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { loginSchema, registerSchema } from '../schemas/auth.schema';
 
@@ -29,13 +30,12 @@ const authLimiter = rateLimit({
 });
 
 export const authRouter = Router();
-authRouter.use(authLimiter);
 
 function toPublicUser(user: { id: string; email: string; name: string | null; role: string }) {
   return { id: user.id, email: user.email, name: user.name, role: user.role };
 }
 
-authRouter.post('/register', validateBody(registerSchema), async (req, res, next) => {
+authRouter.post('/register', authLimiter, validateBody(registerSchema), async (req, res, next) => {
   try {
     const { email, password, name } = req.body;
 
@@ -59,7 +59,7 @@ authRouter.post('/register', validateBody(registerSchema), async (req, res, next
   }
 });
 
-authRouter.post('/login', validateBody(loginSchema), async (req, res, next) => {
+authRouter.post('/login', authLimiter, validateBody(loginSchema), async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -110,4 +110,16 @@ authRouter.post('/refresh', async (req, res, next) => {
 authRouter.post('/logout', (_req, res) => {
   res.clearCookie(REFRESH_COOKIE_NAME, { path: REFRESH_COOKIE_OPTIONS.path });
   res.status(204).send();
+});
+
+authRouter.get('/me', authenticate, async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId! } });
+    if (!user) {
+      throw new AppError(401, 'User no longer exists');
+    }
+    res.json({ user: toPublicUser(user) });
+  } catch (err) {
+    next(err);
+  }
 });

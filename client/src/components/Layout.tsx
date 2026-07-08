@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useNavigate } from 'react-router';
+import { useAuth } from '../auth/AuthContext';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-full px-4 py-2 text-sm font-medium transition-colors ${
@@ -6,24 +7,47 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function Layout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-white/10">
         <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <span className="text-lg font-semibold tracking-tight">BeniFits</span>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <NavLink to="/" end className={navLinkClass}>
               Home
             </NavLink>
-            <NavLink to="/login" className={navLinkClass}>
-              Login
-            </NavLink>
-            <NavLink to="/register" className={navLinkClass}>
-              Register
-            </NavLink>
-            <NavLink to="/profile" className={navLinkClass}>
-              Profile
-            </NavLink>
+            {user ? (
+              <>
+                <NavLink to="/profile" className={navLinkClass}>
+                  Profile
+                </NavLink>
+                <span className="px-2 text-sm text-slate-400">{user.name ?? user.email}</span>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:text-white"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" className={navLinkClass}>
+                  Login
+                </NavLink>
+                <NavLink to="/register" className={navLinkClass}>
+                  Register
+                </NavLink>
+              </>
+            )}
           </div>
         </nav>
       </header>
