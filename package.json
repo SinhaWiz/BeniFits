@@ -14,7 +14,8 @@
     "start:server": "npm --workspace server start",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "npm run typecheck --workspace client && npm run typecheck --workspace server"
+    "typecheck": "npm run typecheck --workspace client && npm run typecheck --workspace server",
+    "test": "npm run test --workspace client && npm run test --workspace server"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
