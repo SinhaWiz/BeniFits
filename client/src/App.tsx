@@ -1,39 +1,21 @@
-import { useEffect, useState } from 'react';
+import { Route, Routes } from 'react-router';
+import Layout from './components/Layout';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import NotFoundPage from './pages/NotFoundPage';
+import ProfilePage from './pages/ProfilePage';
+import RegisterPage from './pages/RegisterPage';
 
 export default function App() {
-  const [message, setMessage] = useState('Loading health status...');
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadHealth() {
-      try {
-        const response = await fetch('/api/health');
-        const data = await response.json();
-        if (active) {
-          setMessage(data.message);
-        }
-      } catch {
-        if (active) {
-          setMessage('API server is not responding yet.');
-        }
-      }
-    }
-
-    loadHealth();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
   return (
-    <main className="app-shell">
-      <section className="hero-card">
-        <p className="eyebrow">BeniHealth</p>
-        <h1>Fullstack React starter</h1>
-        <p className="subtitle">{message}</p>
-      </section>
-    </main>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }
