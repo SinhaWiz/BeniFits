@@ -4,6 +4,7 @@ import express from 'express';
 import { prisma } from './lib/prisma';
 import { errorHandler } from './middleware/errorHandler';
 import { authRouter } from './routes/auth.routes';
+import { profileRouter } from './routes/profile.routes';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -34,6 +35,7 @@ app.get('/api', (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+app.use('/api/profile', profileRouter);
 
 app.use(errorHandler);
 
