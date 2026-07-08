@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  GUEST
+  USER
+  NUTRITIONIST
+  DOCTOR
+  COACH
+  ADMIN
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  ACTIVE
+  VERY_ACTIVE
+}
+
+enum Goal {
+  LOSE_WEIGHT
+  GAIN_MUSCLE
+  MAINTAIN_WEIGHT
+  HEALTHY_EATING
+  IMPROVE_STAMINA
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  name          String?
+  role          Role           @default(USER)
+  avatar        String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  healthProfile HealthProfile?
+}
+
+model HealthProfile {
+  id              String         @id @default(cuid())
+  userId          String         @unique
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age             Int?
+  heightCm        Float?
+  weightKg        Float?
+  bmi             Float?
+  bloodGroup      String?
+  activityLevel   ActivityLevel?
+  goal            Goal?
+  sleepHours      Float?
+  waterIntakeMl   Int?
+  diseases        String[]       @default([])
+  allergies       String[]       @default([])
+  foodPreferences String[]       @default([])
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
