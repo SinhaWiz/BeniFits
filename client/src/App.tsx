@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProfilePage from './pages/ProfilePage';
+import ProgressPage from './pages/ProgressPage';
 import RegisterPage from './pages/RegisterPage';
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="register" element={<RegisterPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="progress" element={<ProgressPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

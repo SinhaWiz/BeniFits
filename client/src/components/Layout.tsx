@@ -29,6 +29,9 @@ export default function Layout() {
                 <NavLink to="/profile" className={navLinkClass}>
                   Profile
                 </NavLink>
+                <NavLink to="/progress" className={navLinkClass}>
+                  Progress
+                </NavLink>
                 <span className="px-2 text-sm text-slate-400">{user.name ?? user.email}</span>
                 <button
                   type="button"
