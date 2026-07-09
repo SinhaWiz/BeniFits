@@ -8,6 +8,7 @@ import { dietPlanRouter } from './routes/dietPlan.routes';
 import { nutritionRouter } from './routes/nutrition.routes';
 import { profileRouter } from './routes/profile.routes';
 import { progressRouter } from './routes/progress.routes';
+import { workoutPlanRouter } from './routes/workoutPlan.routes';
 
 export const app = express();
 
@@ -41,5 +42,6 @@ app.use('/api/profile', profileRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/nutrition', nutritionRouter);
 app.use('/api/diet-plans', dietPlanRouter);
+app.use('/api/workout-plans', workoutPlanRouter);
 
 app.use(errorHandler);
