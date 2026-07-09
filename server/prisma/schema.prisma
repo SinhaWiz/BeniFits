@@ -36,6 +36,13 @@ enum Goal {
   IMPROVE_STAMINA
 }
 
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
 model User {
   id              String          @id @default(cuid())
   email           String          @unique
@@ -47,6 +54,7 @@ model User {
   updatedAt       DateTime        @updatedAt
   healthProfile   HealthProfile?
   progressEntries ProgressEntry[]
+  dietPlans       DietPlan[]
 }
 
 model HealthProfile {
@@ -87,4 +95,37 @@ model ProgressEntry {
 
   @@unique([userId, recordedAt])
   @@index([userId, recordedAt])
+}
+
+model DietPlan {
+  id             String         @id @default(cuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  targetCalories Int?
+  targetProteinG Float?
+  targetFatG     Float?
+  targetCarbsG   Float?
+  meals          DietPlanMeal[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([userId])
+}
+
+model DietPlanMeal {
+  id          String   @id @default(cuid())
+  dietPlanId  String
+  dietPlan    DietPlan @relation(fields: [dietPlanId], references: [id], onDelete: Cascade)
+  mealType    MealType
+  description String
+  fdcId       Int?
+  calories    Int?
+  proteinG    Float?
+  fatG        Float?
+  carbsG      Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dietPlanId])
 }
