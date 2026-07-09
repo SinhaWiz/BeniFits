@@ -2,17 +2,12 @@ import { Router } from 'express';
 import { AppError } from '../errors/AppError';
 import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
+import { computeBmi } from '../lib/health';
 import { prisma } from '../lib/prisma';
 import { healthProfileSchema } from '../schemas/profile.schema';
 
 export const profileRouter = Router();
 profileRouter.use(authenticate);
-
-function computeBmi(heightCm?: number, weightKg?: number): number | null {
-  if (!heightCm || !weightKg) return null;
-  const heightM = heightCm / 100;
-  return Math.round((weightKg / (heightM * heightM)) * 10) / 10;
-}
 
 profileRouter.get('/', async (req, res, next) => {
   try {

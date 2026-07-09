@@ -37,15 +37,16 @@ enum Goal {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  passwordHash  String
-  name          String?
-  role          Role           @default(USER)
-  avatar        String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  healthProfile HealthProfile?
+  id              String          @id @default(cuid())
+  email           String          @unique
+  passwordHash    String
+  name            String?
+  role            Role            @default(USER)
+  avatar          String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  healthProfile   HealthProfile?
+  progressEntries ProgressEntry[]
 }
 
 model HealthProfile {
@@ -66,4 +67,24 @@ model HealthProfile {
   foodPreferences String[]       @default([])
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+}
+
+model ProgressEntry {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recordedAt      DateTime @db.Date
+  weightKg        Float?
+  bmi             Float?
+  bodyFatPercent  Float?
+  waistCm         Float?
+  sleepHours      Float?
+  waterIntakeMl   Int?
+  exerciseMinutes Int?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, recordedAt])
+  @@index([userId, recordedAt])
 }

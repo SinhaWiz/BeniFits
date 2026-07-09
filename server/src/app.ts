@@ -5,6 +5,7 @@ import { prisma } from './lib/prisma';
 import { errorHandler } from './middleware/errorHandler';
 import { authRouter } from './routes/auth.routes';
 import { profileRouter } from './routes/profile.routes';
+import { progressRouter } from './routes/progress.routes';
 
 export const app = express();
 
@@ -35,5 +36,6 @@ app.get('/api', (_req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/profile', profileRouter);
+app.use('/api/progress', progressRouter);
 
 app.use(errorHandler);
