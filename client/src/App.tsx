@@ -9,6 +9,7 @@ import NutritionPage from './pages/NutritionPage';
 import ProfilePage from './pages/ProfilePage';
 import ProgressPage from './pages/ProgressPage';
 import RegisterPage from './pages/RegisterPage';
+import WorkoutPlannerPage from './pages/WorkoutPlannerPage';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="progress" element={<ProgressPage />} />
           <Route path="nutrition" element={<NutritionPage />} />
           <Route path="diet-plan" element={<DietPlannerPage />} />
+          <Route path="workouts" element={<WorkoutPlannerPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

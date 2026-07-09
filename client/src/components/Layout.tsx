@@ -18,9 +18,9 @@ export default function Layout() {
   return (
     <div className="min-h-screen">
       <header className="border-b border-white/10">
-        <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+        <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-y-2 px-6 py-4">
           <span className="text-lg font-semibold tracking-tight">BeniFits</span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <NavLink to="/" end className={navLinkClass}>
               Home
             </NavLink>
@@ -37,6 +37,9 @@ export default function Layout() {
                 </NavLink>
                 <NavLink to="/diet-plan" className={navLinkClass}>
                   Diet Plan
+                </NavLink>
+                <NavLink to="/workouts" className={navLinkClass}>
+                  Workouts
                 </NavLink>
                 <span className="px-2 text-sm text-slate-400">{user.name ?? user.email}</span>
                 <button
