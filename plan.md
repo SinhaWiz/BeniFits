@@ -5,7 +5,7 @@ breakdown for every round of work completed so far. Each round maps to one
 phase of the original blueprint; each round is broken into small sub-plans,
 and every sub-plan ends in its own commit (see `git log` for exact diffs).
 
-**Status as of this writing: Phases 1–4 complete (31 commits). Phases 5–8 not started.**
+**Status as of this writing: Phases 1–5 complete (39 commits). Phases 6–8 not started.**
 
 ---
 
@@ -20,7 +20,7 @@ wellness platform. The full blueprint defines 8 phases:
 | 2 | Core Health — diet planner, calorie calculator, workout planner, progress tracking | ✅ Done |
 | 3 | AI Features — AI nutritionist, AI weight-loss coach, personalized recommendations | ✅ Done (partial — see scope note) |
 | 4 | Expert Marketplace — expert profiles, booking, chat, payments, consultations | ✅ Done (partial — see scope note) |
-| 5 | Community — social feed, stories, comments, follows, challenges | ⬜ Not started |
+| 5 | Community — social feed, stories, comments, follows, challenges | ✅ Done (partial — see scope note) |
 | 6 | Content Platform — daily recipes, health news, research summaries, video recommendations | ⬜ Not started |
 | 7 | Wellness — mood tracking, meditation, sleep tools, gamification | ⬜ Not started |
 | 8 | Production Readiness — notifications, monitoring, CI/CD, testing, security hardening, scaling | ⬜ Not started |
@@ -257,6 +257,72 @@ rather than answered.
 
 ---
 
+## Phase 5 — Community ✅ (partial scope)
+
+**Goal:** the core social loop — post, like, comment, follow, and a
+lightweight public profile to land on. Ephemeral 24h "stories" and
+challenges/leaderboard were scoped out for a later round (challenges
+overlaps with Phase 7's Wellness gamification anyway).
+
+| # | Sub-plan | Commit |
+|---|---|---|
+| 1 | `Post` model + core posts API (create, paginated feed, owner delete) | `5d9ff05` |
+| 2 | `PostLike` + `Comment` models, nested like/comment API | `2666679` |
+| 3 | `Follow` model + users API (public profile, follow/unfollow) | `e5bc861` |
+| 4 | Community feed UI (composer, Discover/Following tabs, like button) | `321291d` |
+| 5 | Inline comment threads on the feed | `c961cf6` |
+| 6 | Public user profile page (`/users/:id`) | `f301988` |
+| 7 | Backend tests (posts, likes, comments, follows) | `faeb988` |
+| 8 | Frontend tests (feed, profile) | `0d3ed4b` |
+
+**Scope simplifications vs. the literal blueprint wording:**
+- No stories: no ephemeral 24h media posts, a distinct UI paradigm from
+  the rest of this round.
+- No challenges/leaderboard: gamification is deferred to Phase 7.
+- Text-only posts: no images. No file-upload infrastructure exists in
+  this codebase (no multer, no cloud storage SDK; `User.avatar` remains
+  an unused string column), so this avoids introducing a new infra
+  category for a feature that could reasonably go several ways.
+- Public profile shows follower/following **counts** only, no list
+  pages — nothing else would consume a followers/following list this
+  round, so it wasn't built.
+
+**Key decisions / things found along the way:**
+- One endpoint (`GET /api/posts`) does triple duty — global feed
+  (`scope=discover`), following-only feed (`scope=following`), and a
+  single author's posts (`authorId=`, reused by the profile page) —
+  instead of three separate endpoints, since the shape and pagination
+  logic is identical across all three.
+- Pagination is plain `take`/`skip` with a `take+1`/slice `hasMore`
+  trick (no extra COUNT query), not cursor-based — matches the
+  codebase's existing bias toward simplicity (the expert directory has
+  no pagination at all).
+- The "Following" feed excludes the viewer's own posts and uses a
+  nested relation filter (`author.followers.some(followerId: viewer)`)
+  rather than fetching follow IDs separately.
+- Like/unlike are separate `POST`/`DELETE` endpoints (not a toggle),
+  matching the explicit-state-transition style already established by
+  appointment status changes — 409 on double-like, 404 on unliking
+  something not liked.
+- The like button uses plain `invalidateQueries` like every other
+  mutation in this codebase, not an optimistic update — confirmed with
+  the user rather than assumed, to keep the mutation pattern consistent
+  rather than introduce the first exception.
+- `PostCard` (feed post rendering, including the like button and
+  comment thread) is defined once in `FeedPage.tsx` and exported for
+  reuse on `UserProfilePage.tsx`, instead of duplicating post-rendering
+  markup across two pages.
+- Found and fixed a real test-infrastructure bug while writing this
+  phase's frontend tests: `client/vitest.config.ts` doesn't enable
+  `test.globals`, so Testing Library's automatic `afterEach(cleanup)`
+  never registered — multi-test files were silently leaking rendered
+  DOM between tests within the same file (a leftover button from test 1
+  was still present when test 2 ran). Fixed by wiring `cleanup()`
+  explicitly in `client/tests/setup.ts`, which also retroactively
+  hardens every existing multi-test file from Phase 4.
+
+---
+
 ## Cross-cutting infrastructure notes (apply to all phases)
 
 - **Database:** PostgreSQL via Docker Compose (`docker compose up -d`),
@@ -278,11 +344,14 @@ rather than answered.
 - **Testing:** every feature round ends in its own test sub-plan. Server
   tests mock external APIs (USDA, Anthropic) via `vi.mock` so the suite
   never depends on live network access or real credentials; Phase 4's
-  messaging tests are the one exception that spins up a real Socket.IO
-  server instead of mocking, since nothing external is being called.
-  `npm test` from the repo root runs both workspaces; currently 71 tests
-  total (56 server + 15 client), all green and confirmed stable across
-  repeated runs.
+  messaging tests and all of Phase 5's tests are exceptions that hit a
+  real Postgres test DB with no mocking, since nothing external is being
+  called. `npm test` from the repo root runs both workspaces; currently
+  87 tests total (69 server + 18 client), all green and confirmed stable
+  across repeated runs. `client/tests/setup.ts` explicitly wires
+  `afterEach(cleanup)` from Testing Library (Phase 5 found `test.globals`
+  isn't enabled, so the automatic version never registered) — any new
+  multi-test file benefits from this without extra setup.
 - **Verification discipline:** every sub-plan is exercised end-to-end via
   curl (or the Vite dev proxy) against the real running stack before being
   committed — not just "tests pass," but the actual HTTP behavior observed.
@@ -299,8 +368,9 @@ rather than answered.
    processing (Stripe vs. SSLCommerz per the blueprint) and a video call
    provider for consultations, plus self-serve expert onboarding (currently
    demo accounts only, provisioned via the seed script).
-3. **Phase 5 — Community:** social feed, posts, comments, follows,
-   challenges/leaderboard.
+3. **Community follow-up (deferred from Phase 5):** ephemeral 24h stories
+   and challenges/leaderboard — challenges likely gets built alongside
+   Phase 7's gamification instead of as a standalone add-on.
 4. **Phase 6 — Content Platform:** recipes, daily health news, research
    summaries, motivational videos — likely needs external content APIs
    (Spoonacular/Edamam, PubMed, YouTube Data API) with the same lazy-key
@@ -310,7 +380,7 @@ rather than answered.
    monitoring (Sentry/Prometheus), CI/CD, security hardening, deployment.
    Should happen before any real users touch the app in production.
 
-Each of these, when started, will get the same treatment as Phases 1–4:
+Each of these, when started, will get the same treatment as Phases 1–5:
 scope confirmed with the user, broken into small sub-plans, each sub-plan
 verified end-to-end and committed on its own — and this file updated to
 reflect the new state.
