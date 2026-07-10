@@ -6,13 +6,16 @@ import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import './index.css';
 import { queryClient } from './lib/queryClient';
+import { SocketProvider } from './realtime/SocketContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <App />
+          <SocketProvider>
+            <App />
+          </SocketProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

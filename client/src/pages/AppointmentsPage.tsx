@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
 import { Badge, Button, Card } from '../components/ui';
 import { apiClient } from '../lib/apiClient';
@@ -125,8 +126,14 @@ export default function AppointmentsPage() {
                 {appointment.notes && (
                   <p className="mt-2 text-sm text-slate-400">{appointment.notes}</p>
                 )}
-                {active && (
-                  <div className="mt-4 flex flex-wrap gap-3">
+                {appointment.status !== 'CANCELLED' && (
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <Link
+                      to={`/appointments/${appointment.id}/messages`}
+                      className="text-sm text-sky-300 hover:text-sky-200"
+                    >
+                      Message
+                    </Link>
                     {view === 'expert' && appointment.status === 'PENDING' && (
                       <button
                         type="button"
@@ -149,15 +156,17 @@ export default function AppointmentsPage() {
                         Mark completed
                       </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        statusMutation.mutate({ id: appointment.id, status: 'CANCELLED' })
-                      }
-                      className="text-sm text-rose-400 hover:text-rose-300"
-                    >
-                      Cancel
-                    </button>
+                    {active && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          statusMutation.mutate({ id: appointment.id, status: 'CANCELLED' })
+                        }
+                        className="text-sm text-rose-400 hover:text-rose-300"
+                      >
+                        Cancel
+                      </button>
+                    )}
                   </div>
                 )}
               </Card>
