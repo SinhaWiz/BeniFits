@@ -16,6 +16,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import NutritionPage from './pages/NutritionPage';
 import ProfilePage from './pages/ProfilePage';
 import ProgressPage from './pages/ProgressPage';
+import RecipeDetailPage from './pages/RecipeDetailPage';
 import RecipesPage from './pages/RecipesPage';
 import RegisterPage from './pages/RegisterPage';
 import UserProfilePage from './pages/UserProfilePage';
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="nutrition" element={<NutritionPage />} />
           <Route path="diet-plan" element={<DietPlannerPage />} />
           <Route path="recipes" element={<RecipesPage />} />
+          <Route path="recipes/:id" element={<RecipeDetailPage />} />
           <Route path="workouts" element={<WorkoutPlannerPage />} />
           <Route path="ai-nutritionist" element={<AiChatPage />} />
           <Route path="ai-weight-loss-coach" element={<AiWeightLossCoachPage />} />
