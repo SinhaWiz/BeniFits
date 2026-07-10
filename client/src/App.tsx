@@ -17,6 +17,7 @@ import NutritionPage from './pages/NutritionPage';
 import ProfilePage from './pages/ProfilePage';
 import ProgressPage from './pages/ProgressPage';
 import RegisterPage from './pages/RegisterPage';
+import UserProfilePage from './pages/UserProfilePage';
 import WorkoutPlannerPage from './pages/WorkoutPlannerPage';
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="register" element={<RegisterPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="feed" element={<FeedPage />} />
+          <Route path="users/:id" element={<UserProfilePage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="progress" element={<ProgressPage />} />
           <Route path="nutrition" element={<NutritionPage />} />

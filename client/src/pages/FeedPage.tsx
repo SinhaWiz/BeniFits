@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
 import { Badge, Button, Card } from '../components/ui';
 import { apiClient } from '../lib/apiClient';
@@ -117,7 +118,7 @@ interface PostCardProps {
   post: Post;
 }
 
-function PostCard({ post }: PostCardProps) {
+export function PostCard({ post }: PostCardProps) {
   const queryClient = useQueryClient();
   const [showComments, setShowComments] = useState(false);
 
@@ -138,7 +139,12 @@ function PostCard({ post }: PostCardProps) {
     <Card>
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="font-medium text-slate-100">{post.author.name ?? 'Member'}</p>
+          <Link
+            to={`/users/${post.author.id}`}
+            className="font-medium text-slate-100 hover:text-sky-300"
+          >
+            {post.author.name ?? 'Member'}
+          </Link>
           <p className="text-xs text-slate-400">{formatPostTime(post.createdAt)}</p>
         </div>
         <Badge>{post.author.role}</Badge>
