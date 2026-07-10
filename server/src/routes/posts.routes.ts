@@ -66,7 +66,7 @@ async function findOwnedComment(id: string, postId: string, userId: string) {
 
 postsRouter.get('/', async (req, res, next) => {
   try {
-    const { authorId } = req.query;
+    const { authorId, scope } = req.query;
     const take = parseTake(req.query.take);
     const skip = parseSkip(req.query.skip);
     const userId = req.userId!;
@@ -74,6 +74,9 @@ postsRouter.get('/', async (req, res, next) => {
     const where: Record<string, unknown> = {};
     if (typeof authorId === 'string' && authorId.length > 0) {
       where.authorId = authorId;
+    } else if (scope === 'following') {
+      where.authorId = { not: userId };
+      where.author = { followers: { some: { followerId: userId } } };
     }
 
     const posts = await prisma.post.findMany({
