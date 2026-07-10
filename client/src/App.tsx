@@ -12,6 +12,7 @@ import ExpertsPage from './pages/ExpertsPage';
 import FeedPage from './pages/FeedPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
+import NewsPage from './pages/NewsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import NutritionPage from './pages/NutritionPage';
 import ProfilePage from './pages/ProfilePage';
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="diet-plan" element={<DietPlannerPage />} />
           <Route path="recipes" element={<RecipesPage />} />
           <Route path="recipes/:id" element={<RecipeDetailPage />} />
+          <Route path="news" element={<NewsPage />} />
           <Route path="workouts" element={<WorkoutPlannerPage />} />
           <Route path="ai-nutritionist" element={<AiChatPage />} />
           <Route path="ai-weight-loss-coach" element={<AiWeightLossCoachPage />} />
