@@ -103,6 +103,7 @@ model User {
   aiWeightLossPlans AiWeightLossPlan[]
   expertProfile     ExpertProfile?
   appointments      Appointment[]     @relation("ClientAppointments")
+  messages          Message[]
 }
 
 model HealthProfile {
@@ -305,7 +306,7 @@ model AvailabilitySlot {
   startsAt        DateTime
   endsAt          DateTime
   status          SlotStatus    @default(OPEN)
-  appointment     Appointment?
+  appointments    Appointment[]
   createdAt       DateTime      @default(now())
 
   @@unique([expertProfileId, startsAt])
@@ -318,13 +319,37 @@ model Appointment {
   client          User              @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
   expertProfileId String
   expertProfile   ExpertProfile     @relation(fields: [expertProfileId], references: [id], onDelete: Cascade)
-  slotId          String            @unique
+  slotId          String
   slot            AvailabilitySlot  @relation(fields: [slotId], references: [id], onDelete: Cascade)
   status          AppointmentStatus @default(PENDING)
   notes           String?           @db.Text
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+  conversation    Conversation?
 
   @@index([clientId])
   @@index([expertProfileId, status])
+  @@index([slotId])
+}
+
+model Conversation {
+  id            String      @id @default(cuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  messages      Message[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content        String       @db.Text
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
 }
