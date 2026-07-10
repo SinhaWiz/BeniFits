@@ -88,6 +88,7 @@ model User {
   workoutPlans      WorkoutPlan[]
   aiConversation    AiConversation?
   aiWeightLossPlans AiWeightLossPlan[]
+  expertProfile     ExpertProfile?
 }
 
 model HealthProfile {
@@ -262,4 +263,20 @@ model AiWeightLossPlanWeek {
   notes              String?          @db.Text
 
   @@index([planId])
+}
+
+model ExpertProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialty           String
+  focusArea           String
+  bio                 String   @db.Text
+  credentials         String?  @db.Text
+  yearsExperience     Int?
+  isAcceptingBookings Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([specialty])
 }

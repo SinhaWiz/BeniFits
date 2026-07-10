@@ -7,6 +7,7 @@ import { aiChatRouter } from './routes/aiChat.routes';
 import { aiWeightLossPlanRouter } from './routes/aiWeightLossPlan.routes';
 import { authRouter } from './routes/auth.routes';
 import { dietPlanRouter } from './routes/dietPlan.routes';
+import { expertRouter } from './routes/expert.routes';
 import { nutritionRouter } from './routes/nutrition.routes';
 import { profileRouter } from './routes/profile.routes';
 import { progressRouter } from './routes/progress.routes';
@@ -47,5 +48,6 @@ app.use('/api/diet-plans', dietPlanRouter);
 app.use('/api/workout-plans', workoutPlanRouter);
 app.use('/api/ai/chat', aiChatRouter);
 app.use('/api/ai/weight-loss-plans', aiWeightLossPlanRouter);
+app.use('/api/experts', expertRouter);
 
 app.use(errorHandler);

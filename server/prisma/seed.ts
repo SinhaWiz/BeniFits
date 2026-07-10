@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
 
@@ -7,6 +8,73 @@ const prisma = new PrismaClient({ adapter });
 
 type Category = 'GYM' | 'HOME' | 'CARDIO' | 'HIIT' | 'YOGA' | 'STRETCHING';
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+type ExpertRole = 'NUTRITIONIST' | 'DOCTOR' | 'COACH';
+
+const DEMO_EXPERT_PASSWORD = 'ExpertDemo123!';
+
+interface ExpertSeed {
+  email: string;
+  name: string;
+  role: ExpertRole;
+  specialty: string;
+  focusArea: string;
+  bio: string;
+  credentials?: string;
+  yearsExperience?: number;
+}
+
+const experts: ExpertSeed[] = [
+  {
+    email: 'dr.amina.rahman@benifits.demo',
+    name: 'Dr. Amina Rahman',
+    role: 'NUTRITIONIST',
+    specialty: 'Weight Management',
+    focusArea: 'Sustainable fat loss for busy professionals',
+    bio: 'Registered dietitian with a decade of experience building realistic, non-restrictive nutrition plans.',
+    credentials: 'RD, MSc Clinical Nutrition',
+    yearsExperience: 10,
+  },
+  {
+    email: 'dr.karim.hasan@benifits.demo',
+    name: 'Dr. Karim Hasan',
+    role: 'DOCTOR',
+    specialty: 'Sports Medicine',
+    focusArea: 'Injury prevention and recovery for active adults',
+    bio: 'Sports medicine physician helping recreational and competitive athletes train without breaking down.',
+    credentials: 'MBBS, Diploma in Sports Medicine',
+    yearsExperience: 14,
+  },
+  {
+    email: 'coach.elena.vasquez@benifits.demo',
+    name: 'Elena Vasquez',
+    role: 'COACH',
+    specialty: 'Strength Training',
+    focusArea: 'Beginner-friendly strength programs',
+    bio: 'Certified strength coach specializing in taking absolute beginners through their first year of lifting.',
+    credentials: 'NSCA-CSCS',
+    yearsExperience: 7,
+  },
+  {
+    email: 'dr.sofia.mendes@benifits.demo',
+    name: 'Dr. Sofia Mendes',
+    role: 'NUTRITIONIST',
+    specialty: 'Diabetes Care',
+    focusArea: 'Blood-sugar-friendly meal planning',
+    bio: 'Clinical nutritionist focused on helping clients manage type 2 diabetes through diet.',
+    credentials: 'RD, CDCES',
+    yearsExperience: 9,
+  },
+  {
+    email: 'coach.james.okafor@benifits.demo',
+    name: 'James Okafor',
+    role: 'COACH',
+    specialty: 'Cardio Conditioning',
+    focusArea: 'Building endurance from a sedentary baseline',
+    bio: 'Endurance coach who works with clients starting from zero to their first 5K and beyond.',
+    credentials: 'ACE-CPT',
+    yearsExperience: 5,
+  },
+];
 
 interface ExerciseSeed {
   name: string;
@@ -206,7 +274,7 @@ const exercises: ExerciseSeed[] = [
   },
 ];
 
-async function main() {
+async function seedExercises() {
   for (const exercise of exercises) {
     const existing = await prisma.exercise.findFirst({ where: { name: exercise.name } });
     if (!existing) {
@@ -215,6 +283,35 @@ async function main() {
   }
   const count = await prisma.exercise.count();
   console.log(`Exercise library seeded. Total exercises: ${count}`);
+}
+
+async function seedExperts() {
+  const passwordHash = await argon2.hash(DEMO_EXPERT_PASSWORD);
+
+  for (const expert of experts) {
+    const { email, name, role, specialty, focusArea, bio, credentials, yearsExperience } = expert;
+
+    const user = await prisma.user.upsert({
+      where: { email },
+      create: { email, name, role, passwordHash },
+      update: { name, role },
+    });
+
+    await prisma.expertProfile.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, specialty, focusArea, bio, credentials, yearsExperience },
+      update: { specialty, focusArea, bio, credentials, yearsExperience },
+    });
+  }
+
+  console.log(
+    `Demo experts seeded: ${experts.length} accounts (password: "${DEMO_EXPERT_PASSWORD}").`,
+  );
+}
+
+async function main() {
+  await seedExercises();
+  await seedExperts();
 }
 
 main()
