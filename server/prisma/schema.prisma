@@ -74,19 +74,20 @@ enum AiChatRole {
 }
 
 model User {
-  id              String          @id @default(cuid())
-  email           String          @unique
-  passwordHash    String
-  name            String?
-  role            Role            @default(USER)
-  avatar          String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  healthProfile   HealthProfile?
-  progressEntries ProgressEntry[]
-  dietPlans       DietPlan[]
-  workoutPlans    WorkoutPlan[]
-  aiConversation  AiConversation?
+  id                String             @id @default(cuid())
+  email             String             @unique
+  passwordHash      String
+  name              String?
+  role              Role               @default(USER)
+  avatar            String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  healthProfile     HealthProfile?
+  progressEntries   ProgressEntry[]
+  dietPlans         DietPlan[]
+  workoutPlans      WorkoutPlan[]
+  aiConversation    AiConversation?
+  aiWeightLossPlans AiWeightLossPlan[]
 }
 
 model HealthProfile {
@@ -232,4 +233,33 @@ model AiChatMessage {
   createdAt      DateTime       @default(now())
 
   @@index([conversationId, createdAt])
+}
+
+model AiWeightLossPlan {
+  id             String                 @id @default(cuid())
+  userId         String
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetWeightKg Float
+  durationWeeks  Int
+  summary        String                 @db.Text
+  weeks          AiWeightLossPlanWeek[]
+  createdAt      DateTime               @default(now())
+
+  @@index([userId])
+}
+
+model AiWeightLossPlanWeek {
+  id                 String           @id @default(cuid())
+  planId             String
+  plan               AiWeightLossPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  weekNumber         Int
+  targetCalories     Int
+  targetProteinG     Float
+  workoutSummary     String           @db.Text
+  walkingGoalMinutes Int
+  waterGoalMl        Int
+  sleepGoalHours     Float
+  notes              String?          @db.Text
+
+  @@index([planId])
 }
