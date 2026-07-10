@@ -105,6 +105,8 @@ model User {
   appointments      Appointment[]     @relation("ClientAppointments")
   messages          Message[]
   posts             Post[]
+  postLikes         PostLike[]
+  comments          Comment[]
 }
 
 model HealthProfile {
@@ -356,13 +358,38 @@ model Message {
 }
 
 model Post {
+  id        String     @id @default(cuid())
+  authorId  String
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String     @db.Text
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  likes     PostLike[]
+  comments  Comment[]
+
+  @@index([authorId, createdAt])
+  @@index([createdAt])
+}
+
+model PostLike {
   id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   content   String   @db.Text
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@index([authorId, createdAt])
-  @@index([createdAt])
+  @@index([postId, createdAt])
 }
