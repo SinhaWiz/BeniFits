@@ -10,6 +10,7 @@ import { authRouter } from './routes/auth.routes';
 import { conversationRouter } from './routes/conversation.routes';
 import { dietPlanRouter } from './routes/dietPlan.routes';
 import { expertRouter } from './routes/expert.routes';
+import { newsRouter } from './routes/news.routes';
 import { nutritionRouter } from './routes/nutrition.routes';
 import { postsRouter } from './routes/posts.routes';
 import { profileRouter } from './routes/profile.routes';
@@ -59,5 +60,6 @@ app.use('/api/conversations', conversationRouter);
 app.use('/api/posts', postsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/recipes', recipesRouter);
+app.use('/api/news', newsRouter);
 
 app.use(errorHandler);
