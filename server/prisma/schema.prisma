@@ -68,6 +68,11 @@ enum Difficulty {
   ADVANCED
 }
 
+enum AiChatRole {
+  USER
+  ASSISTANT
+}
+
 model User {
   id              String          @id @default(cuid())
   email           String          @unique
@@ -81,6 +86,7 @@ model User {
   progressEntries ProgressEntry[]
   dietPlans       DietPlan[]
   workoutPlans    WorkoutPlan[]
+  aiConversation  AiConversation?
 }
 
 model HealthProfile {
@@ -206,4 +212,24 @@ model WorkoutPlanExercise {
   durationMinutes  Int?
 
   @@index([workoutPlanDayId])
+}
+
+model AiConversation {
+  id        String          @id @default(cuid())
+  userId    String          @unique
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  AiChatMessage[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model AiChatMessage {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           AiChatRole
+  content        String         @db.Text
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId, createdAt])
 }
