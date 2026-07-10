@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AiChatPage from './pages/AiChatPage';
 import DietPlannerPage from './pages/DietPlannerPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="nutrition" element={<NutritionPage />} />
           <Route path="diet-plan" element={<DietPlannerPage />} />
           <Route path="workouts" element={<WorkoutPlannerPage />} />
+          <Route path="ai-nutritionist" element={<AiChatPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

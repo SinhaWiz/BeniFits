@@ -41,6 +41,9 @@ export default function Layout() {
                 <NavLink to="/workouts" className={navLinkClass}>
                   Workouts
                 </NavLink>
+                <NavLink to="/ai-nutritionist" className={navLinkClass}>
+                  AI Nutritionist
+                </NavLink>
                 <span className="px-2 text-sm text-slate-400">{user.name ?? user.email}</span>
                 <button
                   type="button"

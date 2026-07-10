@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { getAccessToken, setAccessToken } from './tokenStore';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? '/api';
+export const baseURL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 export const apiClient = axios.create({ baseURL, withCredentials: true });
 
