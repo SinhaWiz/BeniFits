@@ -5,6 +5,7 @@ import { prisma } from './lib/prisma';
 import { errorHandler } from './middleware/errorHandler';
 import { aiChatRouter } from './routes/aiChat.routes';
 import { aiWeightLossPlanRouter } from './routes/aiWeightLossPlan.routes';
+import { appointmentRouter } from './routes/appointment.routes';
 import { authRouter } from './routes/auth.routes';
 import { dietPlanRouter } from './routes/dietPlan.routes';
 import { expertRouter } from './routes/expert.routes';
@@ -49,5 +50,6 @@ app.use('/api/workout-plans', workoutPlanRouter);
 app.use('/api/ai/chat', aiChatRouter);
 app.use('/api/ai/weight-loss-plans', aiWeightLossPlanRouter);
 app.use('/api/experts', expertRouter);
+app.use('/api/appointments', appointmentRouter);
 
 app.use(errorHandler);

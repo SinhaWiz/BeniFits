@@ -73,6 +73,19 @@ enum AiChatRole {
   ASSISTANT
 }
 
+enum SlotStatus {
+  OPEN
+  BOOKED
+  CANCELLED
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
 model User {
   id                String             @id @default(cuid())
   email             String             @unique
@@ -89,6 +102,7 @@ model User {
   aiConversation    AiConversation?
   aiWeightLossPlans AiWeightLossPlan[]
   expertProfile     ExpertProfile?
+  appointments      Appointment[]     @relation("ClientAppointments")
 }
 
 model HealthProfile {
@@ -278,5 +292,39 @@ model ExpertProfile {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
+  availabilitySlots AvailabilitySlot[]
+  appointments      Appointment[]
+
   @@index([specialty])
+}
+
+model AvailabilitySlot {
+  id              String        @id @default(cuid())
+  expertProfileId String
+  expertProfile   ExpertProfile @relation(fields: [expertProfileId], references: [id], onDelete: Cascade)
+  startsAt        DateTime
+  endsAt          DateTime
+  status          SlotStatus    @default(OPEN)
+  appointment     Appointment?
+  createdAt       DateTime      @default(now())
+
+  @@unique([expertProfileId, startsAt])
+  @@index([expertProfileId, startsAt])
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  clientId        String
+  client          User              @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
+  expertProfileId String
+  expertProfile   ExpertProfile     @relation(fields: [expertProfileId], references: [id], onDelete: Cascade)
+  slotId          String            @unique
+  slot            AvailabilitySlot  @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  status          AppointmentStatus @default(PENDING)
+  notes           String?           @db.Text
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([clientId])
+  @@index([expertProfileId, status])
 }
