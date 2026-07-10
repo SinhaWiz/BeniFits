@@ -27,6 +27,9 @@ export default function Layout() {
             </NavLink>
             {user ? (
               <>
+                <NavLink to="/feed" className={navLinkClass}>
+                  Feed
+                </NavLink>
                 <NavLink to="/profile" className={navLinkClass}>
                   Profile
                 </NavLink>

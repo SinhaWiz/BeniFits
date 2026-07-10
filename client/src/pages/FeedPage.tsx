@@ -1,0 +1,166 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, type FormEvent } from 'react';
+import { Badge, Button, Card } from '../components/ui';
+import { apiClient } from '../lib/apiClient';
+import { getErrorMessage } from '../lib/errorMessage';
+import type { Post } from '../types/post';
+
+type FeedScope = 'discover' | 'following';
+
+function formatPostTime(createdAt: string): string {
+  return new Date(createdAt).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+interface PostCardProps {
+  post: Post;
+}
+
+function PostCard({ post }: PostCardProps) {
+  const queryClient = useQueryClient();
+
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      if (post.likedByMe) {
+        await apiClient.delete(`/posts/${post.id}/like`);
+      } else {
+        await apiClient.post(`/posts/${post.id}/like`);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+  });
+
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="font-medium text-slate-100">{post.author.name ?? 'Member'}</p>
+          <p className="text-xs text-slate-400">{formatPostTime(post.createdAt)}</p>
+        </div>
+        <Badge>{post.author.role}</Badge>
+      </div>
+      <p className="mt-3 whitespace-pre-wrap text-sm text-slate-200">{post.content}</p>
+      <div className="mt-4 flex items-center gap-4 text-sm">
+        <button
+          type="button"
+          onClick={() => likeMutation.mutate()}
+          disabled={likeMutation.isPending}
+          className={
+            post.likedByMe
+              ? 'font-medium text-sky-300 hover:text-sky-200'
+              : 'text-slate-300 hover:text-white'
+          }
+        >
+          {post.likedByMe ? 'Liked' : 'Like'} ({post.likesCount})
+        </button>
+        <span className="text-slate-400">
+          {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
+        </span>
+      </div>
+    </Card>
+  );
+}
+
+export default function FeedPage() {
+  const queryClient = useQueryClient();
+  const [scope, setScope] = useState<FeedScope>('discover');
+  const [draft, setDraft] = useState('');
+  const [postError, setPostError] = useState<string | null>(null);
+
+  const feedQuery = useQuery({
+    queryKey: ['posts', { scope }],
+    queryFn: async () => {
+      const res = await apiClient.get<{ posts: Post[] }>('/posts', { params: { scope } });
+      return res.data.posts;
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (content: string) => {
+      await apiClient.post('/posts', { content });
+    },
+    onSuccess: () => {
+      setDraft('');
+      setPostError(null);
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+    onError: (err) => {
+      setPostError(getErrorMessage(err, 'Unable to create post'));
+    },
+  });
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!draft.trim()) return;
+    createMutation.mutate(draft.trim());
+  };
+
+  const posts = feedQuery.data ?? [];
+
+  return (
+    <div className="space-y-8">
+      <Card>
+        <h1 className="text-2xl font-bold">Community feed</h1>
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+          <textarea
+            rows={3}
+            placeholder="Share a win, ask for advice, or cheer someone on..."
+            className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            maxLength={2000}
+          />
+          {postError && <p className="text-sm text-rose-400">{postError}</p>}
+          <Button type="submit" disabled={createMutation.isPending || !draft.trim()}>
+            {createMutation.isPending ? 'Posting...' : 'Post'}
+          </Button>
+        </form>
+      </Card>
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant={scope === 'discover' ? 'primary' : 'secondary'}
+          onClick={() => setScope('discover')}
+          className="px-3 py-1 text-sm"
+        >
+          Discover
+        </Button>
+        <Button
+          type="button"
+          variant={scope === 'following' ? 'primary' : 'secondary'}
+          onClick={() => setScope('following')}
+          className="px-3 py-1 text-sm"
+        >
+          Following
+        </Button>
+      </div>
+
+      {feedQuery.isLoading ? (
+        <p className="text-slate-300">Loading...</p>
+      ) : feedQuery.isError ? (
+        <p className="text-sm text-rose-400">
+          {getErrorMessage(feedQuery.error, 'Unable to load the feed')}
+        </p>
+      ) : posts.length === 0 ? (
+        <p className="text-slate-300">
+          {scope === 'following'
+            ? 'No posts yet from people you follow.'
+            : 'No posts yet. Be the first to share something.'}
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
