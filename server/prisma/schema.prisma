@@ -104,6 +104,7 @@ model User {
   expertProfile     ExpertProfile?
   appointments      Appointment[]     @relation("ClientAppointments")
   messages          Message[]
+  posts             Post[]
 }
 
 model HealthProfile {
@@ -352,4 +353,16 @@ model Message {
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt])
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([authorId, createdAt])
+  @@index([createdAt])
 }

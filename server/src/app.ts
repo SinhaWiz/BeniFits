@@ -11,6 +11,7 @@ import { conversationRouter } from './routes/conversation.routes';
 import { dietPlanRouter } from './routes/dietPlan.routes';
 import { expertRouter } from './routes/expert.routes';
 import { nutritionRouter } from './routes/nutrition.routes';
+import { postsRouter } from './routes/posts.routes';
 import { profileRouter } from './routes/profile.routes';
 import { progressRouter } from './routes/progress.routes';
 import { workoutPlanRouter } from './routes/workoutPlan.routes';
@@ -53,5 +54,6 @@ app.use('/api/ai/weight-loss-plans', aiWeightLossPlanRouter);
 app.use('/api/experts', expertRouter);
 app.use('/api/appointments', appointmentRouter);
 app.use('/api/conversations', conversationRouter);
+app.use('/api/posts', postsRouter);
 
 app.use(errorHandler);
