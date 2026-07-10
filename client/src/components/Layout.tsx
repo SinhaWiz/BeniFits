@@ -51,6 +51,9 @@ export default function Layout() {
                 <NavLink to="/experts" className={navLinkClass}>
                   Experts
                 </NavLink>
+                <NavLink to="/appointments" className={navLinkClass}>
+                  Appointments
+                </NavLink>
                 {EXPERT_ROLES.includes(user.role as (typeof EXPERT_ROLES)[number]) && (
                   <NavLink to="/expert/dashboard" className={navLinkClass}>
                     Expert Dashboard

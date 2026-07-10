@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AiChatPage from './pages/AiChatPage';
 import AiWeightLossCoachPage from './pages/AiWeightLossCoachPage';
+import AppointmentsPage from './pages/AppointmentsPage';
 import DietPlannerPage from './pages/DietPlannerPage';
 import ExpertDashboardPage from './pages/ExpertDashboardPage';
 import ExpertDetailPage from './pages/ExpertDetailPage';
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="experts" element={<ExpertsPage />} />
           <Route path="experts/:id" element={<ExpertDetailPage />} />
           <Route path="expert/dashboard" element={<ExpertDashboardPage />} />
+          <Route path="appointments" element={<AppointmentsPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

@@ -1,9 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router';
-import { Badge, Card } from '../components/ui';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { Badge, Button, Card, Modal } from '../components/ui';
 import { apiClient } from '../lib/apiClient';
 import { getErrorMessage } from '../lib/errorMessage';
-import type { ExpertDetail } from '../types/expert';
+import type { Appointment } from '../types/appointment';
+import type { AvailabilitySlot, ExpertDetail } from '../types/expert';
 
 function formatSlotTime(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -20,6 +22,11 @@ function formatSlotTime(startsAt: string, endsAt: string): string {
 
 export default function ExpertDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(null);
+  const [notes, setNotes] = useState('');
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
   const expertQuery = useQuery({
     queryKey: ['experts', id],
@@ -29,6 +36,33 @@ export default function ExpertDetailPage() {
     },
     enabled: Boolean(id),
   });
+
+  const bookMutation = useMutation({
+    mutationFn: async (slotId: string) => {
+      const res = await apiClient.post<{ appointment: Appointment }>('/appointments', {
+        slotId,
+        notes: notes.trim() || undefined,
+      });
+      return res.data.appointment;
+    },
+    onSuccess: () => {
+      setSelectedSlot(null);
+      setNotes('');
+      setBookingError(null);
+      queryClient.invalidateQueries({ queryKey: ['experts', id] });
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      navigate('/appointments');
+    },
+    onError: (err) => {
+      setBookingError(getErrorMessage(err, 'Unable to book this slot'));
+    },
+  });
+
+  const closeModal = () => {
+    setSelectedSlot(null);
+    setNotes('');
+    setBookingError(null);
+  };
 
   if (expertQuery.isLoading) {
     return <p className="text-slate-300">Loading...</p>;
@@ -86,14 +120,54 @@ export default function ExpertDetailPage() {
             {expert.availabilitySlots.map((slot) => (
               <li
                 key={slot.id}
-                className="rounded-xl border border-white/10 bg-slate-950/40 p-4 text-sm text-slate-200"
+                className="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-slate-950/40 p-4 text-sm text-slate-200"
               >
                 {formatSlotTime(slot.startsAt, slot.endsAt)}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setSelectedSlot(slot)}
+                  className="px-3 py-1 text-xs"
+                >
+                  Book
+                </Button>
               </li>
             ))}
           </ul>
         )}
       </Card>
+
+      {selectedSlot && (
+        <Modal title="Confirm booking" onClose={closeModal}>
+          <p className="text-sm text-slate-300">
+            {formatSlotTime(selectedSlot.startsAt, selectedSlot.endsAt)} with{' '}
+            {expert.user.name ?? 'this expert'}
+          </p>
+          <label htmlFor="notes" className="mt-4 block text-sm font-medium text-slate-300">
+            Notes (optional)
+          </label>
+          <textarea
+            id="notes"
+            rows={3}
+            className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+          {bookingError && <p className="mt-2 text-sm text-rose-400">{bookingError}</p>}
+          <div className="mt-4 flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => bookMutation.mutate(selectedSlot.id)}
+              disabled={bookMutation.isPending}
+            >
+              {bookMutation.isPending ? 'Booking...' : 'Confirm booking'}
+            </Button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
