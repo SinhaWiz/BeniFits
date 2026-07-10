@@ -1,0 +1,316 @@
+# BeniFits — Project Plan
+
+This document tracks the full roadmap for BeniFits and the detailed sub-plan
+breakdown for every round of work completed so far. Each round maps to one
+phase of the original blueprint; each round is broken into small sub-plans,
+and every sub-plan ends in its own commit (see `git log` for exact diffs).
+
+**Status as of this writing: Phases 1–4 complete (31 commits). Phases 5–8 not started.**
+
+---
+
+## Original Blueprint (high-level)
+
+BeniFits is a comprehensive AI-powered fitness, health, nutrition, and
+wellness platform. The full blueprint defines 8 phases:
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Foundation — auth, user profiles, health profile, dashboard, database setup | ✅ Done |
+| 2 | Core Health — diet planner, calorie calculator, workout planner, progress tracking | ✅ Done |
+| 3 | AI Features — AI nutritionist, AI weight-loss coach, personalized recommendations | ✅ Done (partial — see scope note) |
+| 4 | Expert Marketplace — expert profiles, booking, chat, payments, consultations | ✅ Done (partial — see scope note) |
+| 5 | Community — social feed, stories, comments, follows, challenges | ⬜ Not started |
+| 6 | Content Platform — daily recipes, health news, research summaries, video recommendations | ⬜ Not started |
+| 7 | Wellness — mood tracking, meditation, sleep tools, gamification | ⬜ Not started |
+| 8 | Production Readiness — notifications, monitoring, CI/CD, testing, security hardening, scaling | ⬜ Not started |
+
+**Tech stack chosen:** React + Vite + TypeScript + Tailwind CSS v4, React
+Router v7, TanStack Query, React Hook Form + Zod, Recharts (frontend);
+Node.js + Express + TypeScript, Prisma 7 (driver adapters) + PostgreSQL,
+JWT auth, Docker Compose for local Postgres (backend); Anthropic Claude API
+(`@anthropic-ai/sdk`, model `claude-opus-4-8`) for AI features; Vitest +
+Supertest + Testing Library for tests across both workspaces.
+
+**Working method:** each phase is scoped down from the full blueprint
+description into a tight, realistic round (confirmed with the user up
+front), then broken into small sub-plans — typically one backend sub-plan +
+one frontend sub-plan per feature, plus a final sub-plan adding automated
+tests. Every sub-plan is verified end-to-end (curl against the real stack,
+not just unit tests) before being committed on its own.
+
+---
+
+## Phase 1 — Foundation ✅
+
+**Goal:** auth + health profile, on a proper TypeScript/Postgres/Prisma
+foundation, replacing the bare JS starter scaffold.
+
+| # | Sub-plan | Commit |
+|---|---|---|
+| 1 | Migrate client and server to TypeScript + shared ESLint/Prettier config | `aee3785` |
+| 2 | PostgreSQL + Prisma, `User` + `HealthProfile` models | `6184798` |
+| 3 | Email/password auth with JWT (access + refresh, argon2, rate limiting) | `fe16a63` |
+| 4 | Authenticated health profile API (server-computed BMI) | `93b0996` |
+| 5 | Client app shell — routing, TanStack Query, Tailwind | `79f1d40` |
+| 6 | Login/register UI + auth state (`AuthContext`, `ProtectedRoute`) | `0f7472e` |
+| 7 | Health profile form UI | `3109d93` |
+| 8 | Auth + profile automated tests | `e9ad881` |
+
+**Key decisions / things found along the way:**
+- Converted the bare JS starter to TypeScript, Prisma, PostgreSQL before any
+  feature work, since almost no code existed yet.
+- Docker Compose runs Postgres locally (no local `psql` install needed).
+- Prisma 7's new driver-adapter client (`@prisma/adapter-pg`) required an
+  explicit `PrismaPg` adapter — the old "just works from `DATABASE_URL`"
+  pattern is gone.
+- Root `.gitignore`'s `/dist` pattern was anchored to the repo root and
+  silently missed `client/dist` / `server/dist` — fixed.
+- A dependency-hygiene bug: `prisma`'s transitive `@prisma/studio-core` →
+  Radix UI chain pulled in `@types/react@19`, conflicting with the client's
+  pinned React 18 types wherever a package's own type declarations resolved
+  from the hoisted root `node_modules`. Fixed with a root `overrides` entry.
+- Refresh token lives in an httpOnly cookie scoped to `/api/auth`, rotated
+  on every refresh; access token lives in memory on the client only.
+
+---
+
+## Phase 2 — Core Health ✅
+
+**Goal:** the four "Core Health" features from the blueprint — all
+deterministic/rule-based (no AI yet, that's Phase 3).
+
+| # | Sub-plan | Commit |
+|---|---|---|
+| 1 | Progress tracking API (`ProgressEntry`, upsert-by-date, BMI from profile) | `07dd068` |
+| 2 | Progress tracking UI (log form + Recharts weight chart) | `3832495` |
+| 3 | USDA FoodData Central nutrition search API (server-side proxy) | `331bfd3` |
+| 4 | Nutrition calculator UI (search + macros) | `ebfc179` |
+| 5 | Diet planner API (`DietPlan` + `DietPlanMeal`, computed totals) | `a8c5966` |
+| 6 | Diet planner UI (meal builder, pulls macros from nutrition search) | `96afa85` |
+| 7 | Workout planner API — 36-exercise seed library + rule-based weekly generator | `52a9375` |
+| 8 | Workout planner UI (generate + weekly grid view) | `be23d0c` |
+| 9 | Tests for all four Phase 2 features | `5b32b4e` |
+
+**Scope simplifications vs. the literal blueprint wording:**
+- Diet plan = one editable "day template" (title + macro targets + a list
+  of breakfast/lunch/dinner/snack entries), not a multi-day calendar.
+  Shopping-list generation is out of scope.
+- Workout plan = one generated weekly template (7 days, some rest days),
+  not an expanding N-week calendar of dated sessions.
+
+**Key decisions / things found along the way:**
+- USDA's API gateway silently 400s when the `"Survey (FNDDS)"` dataset
+  name's parentheses are percent-encoded — which is exactly how
+  `URLSearchParams` always encodes them. Confirmed via isolated curl-vs-
+  fetch comparison; worked around by dropping that one dataset from the
+  filter rather than hand-rolling non-standard query encoding.
+- An Express + TypeScript overload gap: chaining `validateBody` before a
+  route handler loses the literal `:id` param type inference (falls back to
+  `string | string[]`) in a way that a single-handler route doesn't hit.
+  Caught by the type checker, narrowed explicitly.
+- A flaky-test bug: `lib/prisma.ts` read `process.env.DATABASE_URL` at
+  module-import time, racing against a `setupFiles`-based dotenv call.
+  Fixed via Vitest's `test.env` (populated once in `vitest.config.ts`,
+  guaranteed to apply before any test module loads).
+- The workout generator is deterministic, not AI: `activityLevel` maps to a
+  difficulty tier, `goal` maps to a 7-day category rotation with built-in
+  rest days.
+
+---
+
+## Phase 3 — AI Features ✅ (partial scope)
+
+**Goal:** the two concrete features named in the blueprint's Phase 3 — an
+AI nutritionist chat and an AI weight-loss coach. General "personalized
+recommendations" and the rest of the AI roadmap (grocery lists, symptom
+guidance, recipe generation, research summarization) were scoped out for a
+later round.
+
+| # | Sub-plan | Commit |
+|---|---|---|
+| 1 | AI nutritionist chat API (streaming, `AiConversation` + `AiChatMessage`) | `ea0535f` |
+| 2 | AI nutritionist chat UI (SSE-streamed chat page) | `96ffa42` |
+| 3 | AI weight-loss coach API (structured week-by-week plans) | `b8b2c5c` |
+| 4 | AI weight-loss coach UI (form + weekly plan cards) | `a3226af` |
+| 5 | Tests for both AI features (Anthropic SDK mocked) | `d26100d` |
+
+**Model/SDK choice:** official `@anthropic-ai/sdk` for Node/TypeScript,
+model `claude-opus-4-8`, called server-side only — the API key never
+reaches the browser.
+
+**Key decisions / things found along the way:**
+- **No `ANTHROPIC_API_KEY` is configured yet.** Per instruction, the code
+  reads it from env with no code changes needed once a real key is added;
+  until then `getClaudeClient()` throws a clean `AppError(503)` *before*
+  any DB writes happen, so a request made without a key fails fast with no
+  orphaned messages/plans and no hang. This was verified via curl and is
+  covered by the test suite, but **live generation quality has not been
+  verified** — that needs a real key (see "Next steps" below).
+- One ongoing `AiConversation` per user (not a multi-thread chat), to keep
+  both backend and frontend simple for this round.
+- Chat streams via raw SSE (`client.messages.stream()` on the server,
+  hand-rolled `fetch` + `ReadableStream` frame parser on the client — no
+  extra client dependency needed).
+- Weight-loss plans use the SDK's structured-outputs helper
+  (`zodOutputFormat` + `messages.parse()`), with **one Zod schema shared**
+  between request validation and the model's expected output shape.
+- Both system prompts hard-code a no-diagnosis/no-prescription safety
+  instruction, and both UI pages show a visible "not medical advice"
+  disclaimer banner.
+- LLM-calling endpoints are rate-limited separately from cheap DB-only
+  endpoints, since LLM calls cost real money.
+- Found and fixed a React lint rule violation (`react-hooks/set-state-in-
+  effect`) in the chat page by deriving the message list instead of
+  syncing it via `useEffect` — this also happened to eliminate a UI
+  flicker on send.
+- Found and fixed a real jsdom gap (`scrollIntoView` not implemented) with
+  a minimal polyfill in the shared client test setup.
+
+---
+
+## Phase 4 — Expert Marketplace ✅ (partial scope)
+
+**Goal:** the core marketplace loop — browse experts, book a slot, message
+about the booking. Payments and live video consultations were scoped out
+for a later round (per the user's confirmation up front); the blueprint's
+"payment provider" and "video call provider" open questions are deferred
+rather than answered.
+
+| # | Sub-plan | Commit |
+|---|---|---|
+| 1 | Expert profiles, role-gating middleware, directory API + demo seed data | `ff80470` |
+| 2 | Availability slots + appointment booking API (atomic double-booking guard) | `4f50644` |
+| 3 | Expert directory, detail, and dashboard UI + first UI primitives | `2fe3b6c` |
+| 4 | Booking flow UI (slot picker modal, My Appointments) | `0dd2ff8` |
+| 5 | Socket.IO messaging backend + Conversation/Message models + REST history | `d7ae175` |
+| 6 | socket.io-client integration + messaging UI | `9801229` |
+| 7 | Backend tests (expert directory, booking, messaging) | `f310314` |
+| 8 | Frontend tests (expert pages, appointments, conversation) | `594a127` |
+
+**Scope simplifications vs. the literal blueprint wording:**
+- No payments: bookings use an `AppointmentStatus` enum
+  (`PENDING`/`CONFIRMED`/`CANCELLED`/`COMPLETED`) with no real payment
+  processing. The model is structured so a payment step can be added later
+  without reworking booking.
+- No live video: consultations happen over the in-app chat, not a video
+  call. No video provider is integrated.
+- No admin panel / self-serve expert onboarding: registration always sets
+  `role=USER`. Demo expert accounts (5, across `NUTRITIONIST`/`DOCTOR`/
+  `COACH`) are provisioned by an extended `server/prisma/seed.ts`, upserted
+  by email so reruns are safe.
+- Availability is ad-hoc: experts manually create individual open
+  `AvailabilitySlot` rows, not recurring weekly rules.
+- Chat is scoped one `Conversation` thread per `Appointment` (mirrors the
+  existing `AiConversation` 1:1 pattern), open for messaging from `PENDING`
+  onward and blocked only once `CANCELLED`.
+
+**Key decisions / things found along the way:**
+- The `Role` enum already had `NUTRITIONIST`/`DOCTOR`/`COACH`/`ADMIN`
+  values from Phase 1's schema — no role migration was needed, just a new
+  `requireRole(...)` middleware (the first role-gating middleware in the
+  codebase; everything before this only checked `authenticate` +
+  ownership).
+- Booking uses a `$transaction` with a conditional `updateMany` guard
+  (`where: { status: 'OPEN' }`) to atomically claim a slot — verified via a
+  deliberate concurrent double-booking attempt (one request gets 201, the
+  other 409).
+- Found and fixed a real bug during Phase 4 itself: `Appointment.slotId`
+  was originally `@unique`, so cancelling a booking reopened the slot but
+  left the old cancelled `Appointment` row holding the unique constraint,
+  permanently blocking that slot from ever being rebooked. Fixed by making
+  the slot-to-appointment relation one-to-many (a slot can have many
+  appointments over its lifetime; the atomic `OPEN`→`BOOKED` transition
+  already guarantees only one is ever active).
+- Found and fixed a related concurrency bug: two participants joining a
+  brand-new conversation at the same moment could both attempt
+  `conversation.upsert`, and Prisma's upsert isn't atomic against a true
+  race here — one side got a unique-constraint error instead of joining.
+  Fixed with a `getOrCreateConversation` helper that falls back to a plain
+  fetch on a `P2002` conflict.
+- Messaging uses Socket.IO (`socket.io` + `socket.io-client`) — a new kind
+  of dependency for this codebase, since every prior feature used REST or
+  one-way SSE (the AI chat's streaming technique). JWT auth happens on the
+  socket handshake, reusing the same `verifyAccessToken` as REST. Messages
+  persist to Postgres so history survives reconnects; a REST
+  `GET /api/conversations/:appointmentId/messages` loads history on page
+  mount before the socket joins the room.
+- The Vite dev proxy needed a second entry for `/socket.io` with `ws: true`
+  — the existing `/api` proxy doesn't cover Socket.IO's default path or
+  the WebSocket upgrade.
+- Introduced the first shared UI primitives (`client/src/components/ui`:
+  `Button`, `Card`, `Badge`, `Modal`) since the expert directory's card
+  grid and the booking confirmation dialog were the first UI complex
+  enough to warrant it — thin wrappers around the Tailwind classes already
+  hand-copied across every earlier page, not a new design system.
+- Tightened `AuthUser['role']` from `string` to a proper `Role` union now
+  that role-based UI gating (nav links, the expert dashboard, appointment
+  view toggle) is load-bearing for the first time.
+- Frontend tests for the new role-gated pages (`ExpertDashboardPage`,
+  `AppointmentsPage`) mock `useAuth` directly, since the shared
+  `renderWithProviders` test harness's `AuthProvider` always resolves to a
+  logged-out user (its `/auth/refresh` call is mocked to reject).
+- The messaging test spins up a real `http.Server` wrapping the Express
+  app plus `attachSocket`, and connects with real `socket.io-client`
+  instances — no mocking, consistent with how every other server test
+  hits a real Postgres test database instead of stubbing internals.
+
+---
+
+## Cross-cutting infrastructure notes (apply to all phases)
+
+- **Database:** PostgreSQL via Docker Compose (`docker compose up -d`),
+  Prisma migrations in `server/prisma/migrations/`. Test suite runs against
+  an isolated `benifits_test` database (auto-created and migrated by a
+  Vitest `globalSetup`), never the dev database.
+- **Auth:** every new authenticated route reuses `middleware/auth.ts`
+  (`authenticate`) and scopes list/detail/delete operations to
+  `req.userId`, returning 404 (not 403) on other users' resources to avoid
+  leaking existence.
+- **Validation:** `middleware/validate.ts` + per-feature Zod schemas in
+  `server/src/schemas/`.
+- **Errors:** `errors/AppError.ts` + `middleware/errorHandler.ts` — a
+  single centralized JSON error shape across the whole API.
+- **External API keys:** USDA (`USDA_FDC_API_KEY`) and Anthropic
+  (`ANTHROPIC_API_KEY`) both live in `server/.env` (gitignored, never
+  committed) and are read lazily with a clean `AppError(503)` if unset,
+  rather than crashing the server or failing opaquely.
+- **Testing:** every feature round ends in its own test sub-plan. Server
+  tests mock external APIs (USDA, Anthropic) via `vi.mock` so the suite
+  never depends on live network access or real credentials; Phase 4's
+  messaging tests are the one exception that spins up a real Socket.IO
+  server instead of mocking, since nothing external is being called.
+  `npm test` from the repo root runs both workspaces; currently 71 tests
+  total (56 server + 15 client), all green and confirmed stable across
+  repeated runs.
+- **Verification discipline:** every sub-plan is exercised end-to-end via
+  curl (or the Vite dev proxy) against the real running stack before being
+  committed — not just "tests pass," but the actual HTTP behavior observed.
+
+---
+
+## Next steps
+
+1. **Add a real `ANTHROPIC_API_KEY`** to `server/.env` and spot-check the
+   two AI features live: send a chat message and confirm a grounded,
+   appropriately-disclaimed streamed reply; generate a weight-loss plan and
+   confirm the week-by-week numbers are sane for a given profile.
+2. **Expert Marketplace follow-up (deferred from Phase 4):** real payment
+   processing (Stripe vs. SSLCommerz per the blueprint) and a video call
+   provider for consultations, plus self-serve expert onboarding (currently
+   demo accounts only, provisioned via the seed script).
+3. **Phase 5 — Community:** social feed, posts, comments, follows,
+   challenges/leaderboard.
+4. **Phase 6 — Content Platform:** recipes, daily health news, research
+   summaries, motivational videos — likely needs external content APIs
+   (Spoonacular/Edamam, PubMed, YouTube Data API) with the same lazy-key
+   pattern used for USDA/Anthropic.
+5. **Phase 7 — Wellness:** mood/sleep tracking, meditation, gamification.
+6. **Phase 8 — Production Readiness:** notifications (push/email/SMS),
+   monitoring (Sentry/Prometheus), CI/CD, security hardening, deployment.
+   Should happen before any real users touch the app in production.
+
+Each of these, when started, will get the same treatment as Phases 1–4:
+scope confirmed with the user, broken into small sub-plans, each sub-plan
+verified end-to-end and committed on its own — and this file updated to
+reflect the new state.
