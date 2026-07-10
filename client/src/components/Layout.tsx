@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
+import { EXPERT_ROLES } from '../types/expert';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-full px-4 py-2 text-sm font-medium transition-colors ${
@@ -47,6 +48,14 @@ export default function Layout() {
                 <NavLink to="/ai-weight-loss-coach" className={navLinkClass}>
                   AI Coach
                 </NavLink>
+                <NavLink to="/experts" className={navLinkClass}>
+                  Experts
+                </NavLink>
+                {EXPERT_ROLES.includes(user.role as (typeof EXPERT_ROLES)[number]) && (
+                  <NavLink to="/expert/dashboard" className={navLinkClass}>
+                    Expert Dashboard
+                  </NavLink>
+                )}
                 <span className="px-2 text-sm text-slate-400">{user.name ?? user.email}</span>
                 <button
                   type="button"

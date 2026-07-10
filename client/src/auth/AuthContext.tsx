@@ -2,11 +2,13 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { apiClient } from '../lib/apiClient';
 import { setAccessToken } from '../lib/tokenStore';
 
+export type Role = 'GUEST' | 'USER' | 'NUTRITIONIST' | 'DOCTOR' | 'COACH' | 'ADMIN';
+
 export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
-  role: string;
+  role: Role;
 }
 
 interface AuthContextValue {
