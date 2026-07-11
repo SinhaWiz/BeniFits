@@ -5,7 +5,7 @@ breakdown for every round of work completed so far. Each round maps to one
 phase of the original blueprint; each round is broken into small sub-plans,
 and every sub-plan ends in its own commit (see `git log` for exact diffs).
 
-**Status as of this writing: Phases 1–5 complete (39 commits). Phases 6–8 not started.**
+**Status as of this writing: Phases 1–6 complete (54 commits). Phases 7–8 not started.**
 
 ---
 
@@ -21,7 +21,7 @@ wellness platform. The full blueprint defines 8 phases:
 | 3 | AI Features — AI nutritionist, AI weight-loss coach, personalized recommendations | ✅ Done (partial — see scope note) |
 | 4 | Expert Marketplace — expert profiles, booking, chat, payments, consultations | ✅ Done (partial — see scope note) |
 | 5 | Community — social feed, stories, comments, follows, challenges | ✅ Done (partial — see scope note) |
-| 6 | Content Platform — daily recipes, health news, research summaries, video recommendations | ⬜ Not started |
+| 6 | Content Platform — daily recipes, health news, research summaries, video recommendations | ✅ Done (full scope — see note) |
 | 7 | Wellness — mood tracking, meditation, sleep tools, gamification | ⬜ Not started |
 | 8 | Production Readiness — notifications, monitoring, CI/CD, testing, security hardening, scaling | ⬜ Not started |
 
@@ -323,6 +323,86 @@ overlaps with Phase 7's Wellness gamification anyway).
 
 ---
 
+## Phase 6 — Content Platform ✅ (full scope)
+
+**Goal:** all four content types named in the blueprint — recipes, health
+news, research summaries, video recommendations. Unlike every prior phase,
+this round covered full breadth rather than scoping down (confirmed
+explicitly with the user after flagging it as ~4x the external-API
+surface of any previous round). Each is a lazy-key external-API
+integration following the exact pattern `server/src/lib/usda.ts`
+established in Phase 2.
+
+| # | Sub-plan | Commit |
+|---|---|---|
+| 1 | Spoonacular recipe search/detail client | `c069808` |
+| 2 | Recipes API | `2d00efa` |
+| 3 | Recipes browse page | `ae0e65c` |
+| 4 | Recipe detail page + diet-plan integration | `dde1990` |
+| 5 | NewsAPI health news client | `fccb22f` |
+| 6 | Health news API | `6db7d8b` |
+| 7 | Health news page | `7a0ddb2` |
+| 8 | PubMed research summaries client | `9c3cb06` |
+| 9 | Research summaries API | `1cc6e9b` |
+| 10 | Research summaries page | `4e30467` |
+| 11 | YouTube video search client | `3f74d52` |
+| 12 | Video search API | `903b3a3` |
+| 13 | Video search page | `0332ec2` |
+| 14 | Backend tests (all four content APIs) | `76aa248` |
+| 15 | Frontend tests (all five new pages) | `41320b4` |
+
+**Scope, as confirmed with the user up front:**
+- **Recipes** — Spoonacular API, open-ended search/browse (not a single
+  "recipe of the day"). Integrates with the existing diet planner: a
+  recipe detail page can add itself as a `DietPlanMeal` to an existing or
+  new diet plan.
+- **Health news** — NewsAPI.org. A default feed (`top-headlines?
+  category=health`) plus keyword search (`everything?q=...
+  &sortBy=publishedAt`) once the user types something — no "digest"
+  framing.
+- **Research summaries** — PubMed's free E-utilities API, raw abstracts
+  only, **no AI/Claude involvement** (deliberately not reusing
+  `server/src/lib/claude.ts`, per the user's explicit choice).
+- **Video recommendations** — YouTube Data API v3 keyword search/browse,
+  not ML-personalized recommendations (that would need a new data model
+  and OAuth scope).
+
+**Key decisions / things found along the way:**
+- No new backend endpoint for the diet-plan integration: the client
+  fetches the target plan (already returns its meals embedded via
+  `include: { meals: true }`), appends the new meal, and `PUT`s the whole
+  plan back through the existing full-replace `dietPlanSchema` route from
+  Phase 2 — confirmed with the user as the preferred approach over adding
+  a new `POST /:id/meals` endpoint.
+- `fast-xml-parser` is the only new npm dependency this round — PubMed's
+  abstract text is only reliably available via XML (`esummary`'s JSON
+  mode has no abstract field), and every other client reuses existing
+  dependencies exactly.
+- **Found and fixed a real bug** while live-verifying the PubMed client:
+  `fast-xml-parser` coerces numeric-looking text content (`PMID`, `Year`)
+  into JS numbers by default, silently violating the string-typed
+  `ResearchSummary` contract. Fixed with explicit `String()` coercion at
+  every extraction path — caught specifically because this phase's
+  verification discipline included a real live API call, not just the
+  graceful-503 path the other three clients get.
+- PubMed is the one client whose `getApiKey()` doesn't throw — an
+  optional `PUBMED_API_KEY` only raises NCBI's rate limit (10 req/s vs
+  3 req/s), so the feature works fully keyless. Every request carries a
+  fixed `tool=benifits-app` identifier per NCBI's usage guidelines —
+  deliberately never a real user's email address.
+- Since none of the four API keys are configured yet, verification for
+  Spoonacular/NewsAPI/YouTube followed the same discipline Phase 3 used
+  before a real `ANTHROPIC_API_KEY` existed: confirm the graceful
+  `AppError(503, ...)` path end-to-end via curl. PubMed needed no such
+  workaround — its route and page sub-plans were verified against the
+  real live API, the only fully-live-verified feature in this round.
+- Video search gets the tightest per-user rate limit of the four
+  (`limit: 15` per 15 min) since YouTube's default quota is the most
+  restrictive of the three paid APIs (100 quota units per search against
+  a 10,000/day default budget).
+
+---
+
 ## Cross-cutting infrastructure notes (apply to all phases)
 
 - **Database:** PostgreSQL via Docker Compose (`docker compose up -d`),
@@ -342,16 +422,17 @@ overlaps with Phase 7's Wellness gamification anyway).
   committed) and are read lazily with a clean `AppError(503)` if unset,
   rather than crashing the server or failing opaquely.
 - **Testing:** every feature round ends in its own test sub-plan. Server
-  tests mock external APIs (USDA, Anthropic) via `vi.mock` so the suite
-  never depends on live network access or real credentials; Phase 4's
-  messaging tests and all of Phase 5's tests are exceptions that hit a
-  real Postgres test DB with no mocking, since nothing external is being
-  called. `npm test` from the repo root runs both workspaces; currently
-  87 tests total (69 server + 18 client), all green and confirmed stable
-  across repeated runs. `client/tests/setup.ts` explicitly wires
-  `afterEach(cleanup)` from Testing Library (Phase 5 found `test.globals`
-  isn't enabled, so the automatic version never registered) — any new
-  multi-test file benefits from this without extra setup.
+  tests mock external APIs (USDA, Anthropic, and Phase 6's four content
+  clients) via `vi.mock` so the suite never depends on live network access
+  or real credentials; Phase 4's messaging tests and all of Phase 5's
+  tests are exceptions that hit a real Postgres test DB with no mocking,
+  since nothing external is being called. `npm test` from the repo root
+  runs both workspaces; currently 109 tests total (86 server + 23 client),
+  all green and confirmed stable across repeated runs. `client/tests/
+  setup.ts` explicitly wires `afterEach(cleanup)` from Testing Library
+  (Phase 5 found `test.globals` isn't enabled, so the automatic version
+  never registered) — any new multi-test file benefits from this without
+  extra setup.
 - **Verification discipline:** every sub-plan is exercised end-to-end via
   curl (or the Vite dev proxy) against the real running stack before being
   committed — not just "tests pass," but the actual HTTP behavior observed.
@@ -371,16 +452,19 @@ overlaps with Phase 7's Wellness gamification anyway).
 3. **Community follow-up (deferred from Phase 5):** ephemeral 24h stories
    and challenges/leaderboard — challenges likely gets built alongside
    Phase 7's gamification instead of as a standalone add-on.
-4. **Phase 6 — Content Platform:** recipes, daily health news, research
-   summaries, motivational videos — likely needs external content APIs
-   (Spoonacular/Edamam, PubMed, YouTube Data API) with the same lazy-key
-   pattern used for USDA/Anthropic.
+4. **Add real API keys** for Phase 6's four content integrations
+   (`SPOONACULAR_API_KEY`, `NEWS_API_KEY`, `YOUTUBE_API_KEY`, and
+   optionally `PUBMED_API_KEY` for a higher rate limit) to `server/.env`
+   and spot-check live response shapes — everything was verified against
+   the graceful-503 path for the three key-gated clients, plus one real
+   live PubMed call, but full response-shape verification for Spoonacular/
+   NewsAPI/YouTube needs real keys.
 5. **Phase 7 — Wellness:** mood/sleep tracking, meditation, gamification.
 6. **Phase 8 — Production Readiness:** notifications (push/email/SMS),
    monitoring (Sentry/Prometheus), CI/CD, security hardening, deployment.
    Should happen before any real users touch the app in production.
 
-Each of these, when started, will get the same treatment as Phases 1–5:
+Each of these, when started, will get the same treatment as Phases 1–6:
 scope confirmed with the user, broken into small sub-plans, each sub-plan
 verified end-to-end and committed on its own — and this file updated to
 reflect the new state.
