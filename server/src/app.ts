@@ -18,6 +18,7 @@ import { progressRouter } from './routes/progress.routes';
 import { recipesRouter } from './routes/recipes.routes';
 import { researchRouter } from './routes/research.routes';
 import { usersRouter } from './routes/users.routes';
+import { videosRouter } from './routes/videos.routes';
 import { workoutPlanRouter } from './routes/workoutPlan.routes';
 
 export const app = express();
@@ -63,5 +64,6 @@ app.use('/api/users', usersRouter);
 app.use('/api/recipes', recipesRouter);
 app.use('/api/news', newsRouter);
 app.use('/api/research', researchRouter);
+app.use('/api/videos', videosRouter);
 
 app.use(errorHandler);
