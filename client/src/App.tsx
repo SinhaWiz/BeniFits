@@ -22,6 +22,7 @@ import RecipesPage from './pages/RecipesPage';
 import RegisterPage from './pages/RegisterPage';
 import ResearchPage from './pages/ResearchPage';
 import UserProfilePage from './pages/UserProfilePage';
+import VideosPage from './pages/VideosPage';
 import WorkoutPlannerPage from './pages/WorkoutPlannerPage';
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="recipes/:id" element={<RecipeDetailPage />} />
           <Route path="news" element={<NewsPage />} />
           <Route path="research" element={<ResearchPage />} />
+          <Route path="videos" element={<VideosPage />} />
           <Route path="workouts" element={<WorkoutPlannerPage />} />
           <Route path="ai-nutritionist" element={<AiChatPage />} />
           <Route path="ai-weight-loss-coach" element={<AiWeightLossCoachPage />} />
