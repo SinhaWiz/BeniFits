@@ -16,6 +16,7 @@ import { postsRouter } from './routes/posts.routes';
 import { profileRouter } from './routes/profile.routes';
 import { progressRouter } from './routes/progress.routes';
 import { recipesRouter } from './routes/recipes.routes';
+import { researchRouter } from './routes/research.routes';
 import { usersRouter } from './routes/users.routes';
 import { workoutPlanRouter } from './routes/workoutPlan.routes';
 
@@ -61,5 +62,6 @@ app.use('/api/posts', postsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/recipes', recipesRouter);
 app.use('/api/news', newsRouter);
+app.use('/api/research', researchRouter);
 
 app.use(errorHandler);
