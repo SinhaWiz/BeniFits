@@ -48,6 +48,9 @@ export default function Layout() {
                 <NavLink to="/news" className={navLinkClass}>
                   News
                 </NavLink>
+                <NavLink to="/research" className={navLinkClass}>
+                  Research
+                </NavLink>
                 <NavLink to="/workouts" className={navLinkClass}>
                   Workouts
                 </NavLink>
