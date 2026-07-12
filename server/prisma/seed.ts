@@ -8,6 +8,13 @@ const prisma = new PrismaClient({ adapter });
 
 type Category = 'GYM' | 'HOME' | 'CARDIO' | 'HIIT' | 'YOGA' | 'STRETCHING';
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+type MeditationCategory =
+  | 'BREATHING'
+  | 'BODY_SCAN'
+  | 'SLEEP'
+  | 'FOCUS'
+  | 'STRESS_RELIEF'
+  | 'MINDFULNESS';
 type ExpertRole = 'NUTRITIONIST' | 'DOCTOR' | 'COACH';
 
 const DEMO_EXPERT_PASSWORD = 'ExpertDemo123!';
@@ -309,9 +316,139 @@ async function seedExperts() {
   );
 }
 
+interface MeditationSessionSeed {
+  title: string;
+  category: MeditationCategory;
+  durationMinutes: number;
+  description: string;
+}
+
+const meditationSessions: MeditationSessionSeed[] = [
+  {
+    title: 'Box Breathing',
+    category: 'BREATHING',
+    durationMinutes: 5,
+    description: 'A 4-4-4-4 breathing pattern to quickly settle the nervous system.',
+  },
+  {
+    title: '4-7-8 Breathing',
+    category: 'BREATHING',
+    durationMinutes: 10,
+    description: 'Inhale for 4, hold for 7, exhale for 8 — a classic calming breath ratio.',
+  },
+  {
+    title: 'Deep Belly Breathing',
+    category: 'BREATHING',
+    durationMinutes: 15,
+    description: 'Slow diaphragmatic breathing to lower heart rate and ease tension.',
+  },
+  {
+    title: 'Full Body Scan',
+    category: 'BODY_SCAN',
+    durationMinutes: 15,
+    description: 'A head-to-toe scan noticing sensation and releasing tension in each area.',
+  },
+  {
+    title: 'Quick Tension Release',
+    category: 'BODY_SCAN',
+    durationMinutes: 5,
+    description: 'A fast pass over the shoulders, jaw, and hands to release held tension.',
+  },
+  {
+    title: 'Progressive Muscle Relaxation',
+    category: 'BODY_SCAN',
+    durationMinutes: 20,
+    description: 'Systematically tense and release each muscle group from feet to head.',
+  },
+  {
+    title: 'Wind-Down for Sleep',
+    category: 'SLEEP',
+    durationMinutes: 10,
+    description: 'A slow, quiet session to ease the transition from wakefulness into sleep.',
+  },
+  {
+    title: 'Sleep Body Scan',
+    category: 'SLEEP',
+    durationMinutes: 20,
+    description: 'An extended, unhurried body scan designed to be practiced lying in bed.',
+  },
+  {
+    title: 'Midnight Wake-Up Reset',
+    category: 'SLEEP',
+    durationMinutes: 5,
+    description: 'A short breathing exercise for falling back asleep after waking at night.',
+  },
+  {
+    title: 'Single-Point Focus',
+    category: 'FOCUS',
+    durationMinutes: 10,
+    description: 'Anchor attention on the breath and gently return whenever it wanders.',
+  },
+  {
+    title: 'Pre-Work Focus Reset',
+    category: 'FOCUS',
+    durationMinutes: 5,
+    description: 'A brief session to clear mental clutter before a demanding task.',
+  },
+  {
+    title: 'Deep Work Primer',
+    category: 'FOCUS',
+    durationMinutes: 15,
+    description: 'Build sustained concentration before a long stretch of focused work.',
+  },
+  {
+    title: 'Stress Release Breathing',
+    category: 'STRESS_RELIEF',
+    durationMinutes: 10,
+    description: 'Extended exhales to activate the parasympathetic nervous system.',
+  },
+  {
+    title: 'Letting Go of the Day',
+    category: 'STRESS_RELIEF',
+    durationMinutes: 15,
+    description: 'Process and release the accumulated tension of a difficult day.',
+  },
+  {
+    title: 'Anxiety Grounding',
+    category: 'STRESS_RELIEF',
+    durationMinutes: 5,
+    description: 'A grounding technique using the senses to interrupt anxious spirals.',
+  },
+  {
+    title: 'Mindful Awareness',
+    category: 'MINDFULNESS',
+    durationMinutes: 10,
+    description: 'Observe thoughts and sensations without judgment as they arise and pass.',
+  },
+  {
+    title: 'Gratitude Practice',
+    category: 'MINDFULNESS',
+    durationMinutes: 10,
+    description: 'A guided reflection on people, moments, and things to be grateful for.',
+  },
+  {
+    title: 'Mindful Walking',
+    category: 'MINDFULNESS',
+    durationMinutes: 20,
+    description: 'Bring full attention to the sensations of walking, indoors or outside.',
+  },
+];
+
+async function seedMeditationSessions() {
+  for (const session of meditationSessions) {
+    const existing = await prisma.meditationSession.findFirst({ where: { title: session.title } });
+    if (!existing) {
+      await prisma.meditationSession.create({ data: session });
+    }
+  }
+  const count = await prisma.meditationSession.count();
+  console.log(`Meditation library seeded. Total sessions: ${count}`);
+}
+
 async function main() {
   await seedExercises();
   await seedExperts();
+  await seedMeditationSessions();
 }
 
 main()

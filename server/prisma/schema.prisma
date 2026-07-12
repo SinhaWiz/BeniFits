@@ -73,6 +73,15 @@ enum AiChatRole {
   ASSISTANT
 }
 
+enum MeditationCategory {
+  BREATHING
+  BODY_SCAN
+  SLEEP
+  FOCUS
+  STRESS_RELIEF
+  MINDFULNESS
+}
+
 enum SlotStatus {
   OPEN
   BOOKED
@@ -111,6 +120,7 @@ model User {
   followers         Follow[]          @relation("Followers")
   moodEntries       MoodEntry[]
   sleepEntries      SleepEntry[]
+  meditationLogs    MeditationLog[]
 }
 
 model MoodEntry {
@@ -268,6 +278,31 @@ model WorkoutPlanExercise {
   durationMinutes  Int?
 
   @@index([workoutPlanDayId])
+}
+
+model MeditationSession {
+  id              String             @id @default(cuid())
+  title           String
+  category        MeditationCategory
+  durationMinutes Int
+  description     String             @db.Text
+  createdAt       DateTime           @default(now())
+  logs            MeditationLog[]
+
+  @@index([category])
+}
+
+model MeditationLog {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId       String
+  session         MeditationSession @relation(fields: [sessionId], references: [id])
+  completedOn     DateTime          @db.Date
+  durationMinutes Int
+  createdAt       DateTime          @default(now())
+
+  @@index([userId, completedOn])
 }
 
 model AiConversation {

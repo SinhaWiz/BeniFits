@@ -10,6 +10,7 @@ import { authRouter } from './routes/auth.routes';
 import { conversationRouter } from './routes/conversation.routes';
 import { dietPlanRouter } from './routes/dietPlan.routes';
 import { expertRouter } from './routes/expert.routes';
+import { meditationRouter } from './routes/meditation.routes';
 import { moodRouter } from './routes/mood.routes';
 import { newsRouter } from './routes/news.routes';
 import { nutritionRouter } from './routes/nutrition.routes';
@@ -69,5 +70,6 @@ app.use('/api/research', researchRouter);
 app.use('/api/videos', videosRouter);
 app.use('/api/mood', moodRouter);
 app.use('/api/sleep', sleepRouter);
+app.use('/api/meditation', meditationRouter);
 
 app.use(errorHandler);
