@@ -1,3 +1,4 @@
+import type { ChallengeMetric } from '../generated/prisma/enums';
 import { PrismaClientKnownRequestError } from '../generated/prisma/internal/prismaNamespace';
 import { prisma } from './prisma';
 
@@ -89,7 +90,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   },
 ];
 
-function toDateKey(date: Date): string {
+export function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
@@ -145,4 +146,44 @@ export async function checkAndAwardBadges(userId: string): Promise<BadgeDefiniti
     }
   }
   return newlyEarned;
+}
+
+export async function computeChallengeProgress(
+  userId: string,
+  metric: ChallengeMetric,
+  start: Date,
+  end: Date,
+): Promise<number> {
+  const range = { gte: start, lte: end };
+
+  switch (metric) {
+    case 'MEDITATION_MINUTES': {
+      const aggregate = await prisma.meditationLog.aggregate({
+        where: { userId, completedOn: range },
+        _sum: { durationMinutes: true },
+      });
+      return aggregate._sum.durationMinutes ?? 0;
+    }
+    case 'MOOD_LOGS':
+      return prisma.moodEntry.count({ where: { userId, recordedAt: range } });
+    case 'SLEEP_LOGS':
+      return prisma.sleepEntry.count({ where: { userId, recordedAt: range } });
+    case 'ACTIVE_DAYS': {
+      const [moods, sleeps, meditations] = await Promise.all([
+        prisma.moodEntry.findMany({ where: { userId, recordedAt: range }, select: { recordedAt: true } }),
+        prisma.sleepEntry.findMany({ where: { userId, recordedAt: range }, select: { recordedAt: true } }),
+        prisma.meditationLog.findMany({
+          where: { userId, completedOn: range },
+          select: { completedOn: true },
+        }),
+      ]);
+      const days = new Set<string>();
+      for (const entry of moods) days.add(toDateKey(entry.recordedAt));
+      for (const entry of sleeps) days.add(toDateKey(entry.recordedAt));
+      for (const entry of meditations) days.add(toDateKey(entry.completedOn));
+      return days.size;
+    }
+    default:
+      return 0;
+  }
 }

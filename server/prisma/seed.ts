@@ -15,6 +15,7 @@ type MeditationCategory =
   | 'FOCUS'
   | 'STRESS_RELIEF'
   | 'MINDFULNESS';
+type ChallengeMetric = 'MEDITATION_MINUTES' | 'MOOD_LOGS' | 'SLEEP_LOGS' | 'ACTIVE_DAYS';
 type ExpertRole = 'NUTRITIONIST' | 'DOCTOR' | 'COACH';
 
 const DEMO_EXPERT_PASSWORD = 'ExpertDemo123!';
@@ -445,10 +446,75 @@ async function seedMeditationSessions() {
   console.log(`Meditation library seeded. Total sessions: ${count}`);
 }
 
+interface ChallengeSeed {
+  title: string;
+  description: string;
+  metric: ChallengeMetric;
+  startsAgoDays: number;
+  totalDays: number;
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const challenges: ChallengeSeed[] = [
+  {
+    title: '14-Day Meditation Streak',
+    description: 'Rack up as many meditation minutes as you can over two weeks.',
+    metric: 'MEDITATION_MINUTES',
+    startsAgoDays: 3,
+    totalDays: 14,
+  },
+  {
+    title: 'Mood Check-In Challenge',
+    description: 'Log your mood as many days as possible this month.',
+    metric: 'MOOD_LOGS',
+    startsAgoDays: 5,
+    totalDays: 30,
+  },
+  {
+    title: 'Better Sleep Challenge',
+    description: 'Log a night of sleep as consistently as you can over three weeks.',
+    metric: 'SLEEP_LOGS',
+    startsAgoDays: 2,
+    totalDays: 21,
+  },
+  {
+    title: 'Wellness Consistency Challenge',
+    description: 'Be active in mood, sleep, or meditation tracking on as many days as possible.',
+    metric: 'ACTIVE_DAYS',
+    startsAgoDays: 7,
+    totalDays: 30,
+  },
+];
+
+async function seedChallenges() {
+  for (const challenge of challenges) {
+    const existing = await prisma.challenge.findFirst({ where: { title: challenge.title } });
+    if (!existing) {
+      const startsAt = new Date(Date.now() - challenge.startsAgoDays * DAY_MS);
+      const endsAt = new Date(
+        startsAt.getTime() + challenge.totalDays * DAY_MS,
+      );
+      await prisma.challenge.create({
+        data: {
+          title: challenge.title,
+          description: challenge.description,
+          metric: challenge.metric,
+          startsAt,
+          endsAt,
+        },
+      });
+    }
+  }
+  const count = await prisma.challenge.count();
+  console.log(`Challenges seeded. Total challenges: ${count}`);
+}
+
 async function main() {
   await seedExercises();
   await seedExperts();
   await seedMeditationSessions();
+  await seedChallenges();
 }
 
 main()

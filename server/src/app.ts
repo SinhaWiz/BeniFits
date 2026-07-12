@@ -6,6 +6,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { aiChatRouter } from './routes/aiChat.routes';
 import { aiWeightLossPlanRouter } from './routes/aiWeightLossPlan.routes';
 import { appointmentRouter } from './routes/appointment.routes';
+import { challengeRouter } from './routes/challenge.routes';
 import { authRouter } from './routes/auth.routes';
 import { conversationRouter } from './routes/conversation.routes';
 import { dietPlanRouter } from './routes/dietPlan.routes';
@@ -73,5 +74,6 @@ app.use('/api/mood', moodRouter);
 app.use('/api/sleep', sleepRouter);
 app.use('/api/meditation', meditationRouter);
 app.use('/api/gamification', gamificationRouter);
+app.use('/api/challenges', challengeRouter);
 
 app.use(errorHandler);

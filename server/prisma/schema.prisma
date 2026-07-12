@@ -82,6 +82,13 @@ enum MeditationCategory {
   MINDFULNESS
 }
 
+enum ChallengeMetric {
+  MEDITATION_MINUTES
+  MOOD_LOGS
+  SLEEP_LOGS
+  ACTIVE_DAYS
+}
+
 enum SlotStatus {
   OPEN
   BOOKED
@@ -122,6 +129,7 @@ model User {
   sleepEntries      SleepEntry[]
   meditationLogs    MeditationLog[]
   badges            UserBadge[]
+  challenges        ChallengeParticipant[]
 }
 
 model MoodEntry {
@@ -315,6 +323,31 @@ model UserBadge {
 
   @@unique([userId, badgeKey])
   @@index([userId])
+}
+
+model Challenge {
+  id           String                 @id @default(cuid())
+  title        String
+  description  String                 @db.Text
+  metric       ChallengeMetric
+  startsAt     DateTime
+  endsAt       DateTime
+  createdAt    DateTime               @default(now())
+  participants ChallengeParticipant[]
+
+  @@index([endsAt])
+}
+
+model ChallengeParticipant {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt    DateTime  @default(now())
+
+  @@unique([challengeId, userId])
+  @@index([challengeId])
 }
 
 model AiConversation {
