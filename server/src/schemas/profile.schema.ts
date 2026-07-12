@@ -17,6 +17,7 @@ export const healthProfileSchema = z.object({
   activityLevel: z.enum(activityLevels).optional(),
   goal: z.enum(goals).optional(),
   sleepHours: z.number().min(0).max(24).optional(),
+  sleepGoalHours: z.number().min(0).max(24).optional(),
   waterIntakeMl: z.number().int().min(0).max(20000).optional(),
   diseases: z.array(z.string().max(100)).max(50).default([]),
   allergies: z.array(z.string().max(100)).max(50).default([]),

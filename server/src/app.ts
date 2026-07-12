@@ -18,6 +18,7 @@ import { profileRouter } from './routes/profile.routes';
 import { progressRouter } from './routes/progress.routes';
 import { recipesRouter } from './routes/recipes.routes';
 import { researchRouter } from './routes/research.routes';
+import { sleepRouter } from './routes/sleep.routes';
 import { usersRouter } from './routes/users.routes';
 import { videosRouter } from './routes/videos.routes';
 import { workoutPlanRouter } from './routes/workoutPlan.routes';
@@ -67,5 +68,6 @@ app.use('/api/news', newsRouter);
 app.use('/api/research', researchRouter);
 app.use('/api/videos', videosRouter);
 app.use('/api/mood', moodRouter);
+app.use('/api/sleep', sleepRouter);
 
 app.use(errorHandler);

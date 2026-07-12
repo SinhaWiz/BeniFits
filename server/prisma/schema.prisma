@@ -110,6 +110,7 @@ model User {
   following         Follow[]          @relation("Following")
   followers         Follow[]          @relation("Followers")
   moodEntries       MoodEntry[]
+  sleepEntries      SleepEntry[]
 }
 
 model MoodEntry {
@@ -138,6 +139,7 @@ model HealthProfile {
   activityLevel   ActivityLevel?
   goal            Goal?
   sleepHours      Float?
+  sleepGoalHours  Float?
   waterIntakeMl   Int?
   diseases        String[]       @default([])
   allergies       String[]       @default([])
@@ -158,6 +160,23 @@ model ProgressEntry {
   sleepHours      Float?
   waterIntakeMl   Int?
   exerciseMinutes Int?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, recordedAt])
+  @@index([userId, recordedAt])
+}
+
+model SleepEntry {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recordedAt      DateTime @db.Date
+  bedtime         DateTime
+  wakeTime        DateTime
+  durationMinutes Int
+  qualityRating   Int?
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
