@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Badge, Button, Card, Modal } from '../components/ui';
+import { NewBadgeBanner } from '../components/NewBadgeBanner';
 import { apiClient } from '../lib/apiClient';
 import { getErrorMessage } from '../lib/errorMessage';
+import type { WellnessBadge } from '../types/gamification';
 import {
   MEDITATION_CATEGORIES,
   type MeditationCategory,
@@ -77,6 +79,7 @@ export default function MeditationPage() {
   const [category, setCategory] = useState<MeditationCategory | 'ALL'>('ALL');
   const [activeSession, setActiveSession] = useState<MeditationSession | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [newBadges, setNewBadges] = useState<WellnessBadge[]>([]);
 
   const sessionsQuery = useQuery({
     queryKey: ['meditation', 'sessions', category],
@@ -98,12 +101,17 @@ export default function MeditationPage() {
 
   const logMutation = useMutation({
     mutationFn: async (payload: MeditationLogInput) => {
-      const res = await apiClient.post<{ log: MeditationLog }>('/meditation/logs', payload);
-      return res.data.log;
+      const res = await apiClient.post<{ log: MeditationLog; newBadges: WellnessBadge[] }>(
+        '/meditation/logs',
+        payload,
+      );
+      return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['meditation', 'logs'] });
+      queryClient.invalidateQueries({ queryKey: ['gamification', 'summary'] });
       setServerError(null);
+      setNewBadges(data.newBadges);
       setActiveSession(null);
     },
     onError: (err) => {
@@ -160,6 +168,9 @@ export default function MeditationPage() {
         </div>
 
         {serverError && <p className="mt-4 text-sm text-rose-400">{serverError}</p>}
+        <div className="mt-4">
+          <NewBadgeBanner badges={newBadges} />
+        </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sessionsQuery.isLoading ? (

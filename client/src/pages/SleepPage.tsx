@@ -11,8 +11,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { NewBadgeBanner } from '../components/NewBadgeBanner';
 import { apiClient } from '../lib/apiClient';
 import { getErrorMessage } from '../lib/errorMessage';
+import type { WellnessBadge } from '../types/gamification';
 import type { HealthProfile } from '../types/profile';
 import type { SleepEntry, SleepEntryInput } from '../types/sleep';
 
@@ -65,6 +67,7 @@ const labelClass = 'block text-sm font-medium text-slate-300';
 export default function SleepPage() {
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [newBadges, setNewBadges] = useState<WellnessBadge[]>([]);
 
   const entriesQuery = useQuery({
     queryKey: ['sleep'],
@@ -88,12 +91,17 @@ export default function SleepPage() {
 
   const createMutation = useMutation({
     mutationFn: async (payload: SleepEntryInput) => {
-      const res = await apiClient.post<{ entry: SleepEntry }>('/sleep', payload);
-      return res.data.entry;
+      const res = await apiClient.post<{ entry: SleepEntry; newBadges: WellnessBadge[] }>(
+        '/sleep',
+        payload,
+      );
+      return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['sleep'] });
+      queryClient.invalidateQueries({ queryKey: ['gamification', 'summary'] });
       setServerError(null);
+      setNewBadges(data.newBadges);
       reset({ ...emptyFormValues, recordedAt: todayDateInputValue() });
     },
     onError: (err) => {
@@ -133,6 +141,10 @@ export default function SleepPage() {
               <span className="text-slate-500"> (edit on Profile page)</span>
             </span>
           )}
+        </div>
+
+        <div className="mt-4">
+          <NewBadgeBanner badges={newBadges} />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 grid grid-cols-2 gap-4" noValidate>

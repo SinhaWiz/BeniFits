@@ -10,8 +10,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { NewBadgeBanner } from '../components/NewBadgeBanner';
 import { apiClient } from '../lib/apiClient';
 import { getErrorMessage } from '../lib/errorMessage';
+import type { WellnessBadge } from '../types/gamification';
 import type { MoodEntry, MoodEntryInput } from '../types/mood';
 
 const MOOD_OPTIONS = [
@@ -65,6 +67,7 @@ const labelClass = 'block text-sm font-medium text-slate-300';
 export default function MoodPage() {
   const queryClient = useQueryClient();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [newBadges, setNewBadges] = useState<WellnessBadge[]>([]);
 
   const entriesQuery = useQuery({
     queryKey: ['mood'],
@@ -81,12 +84,17 @@ export default function MoodPage() {
 
   const createMutation = useMutation({
     mutationFn: async (payload: MoodEntryInput) => {
-      const res = await apiClient.post<{ entry: MoodEntry }>('/mood', payload);
-      return res.data.entry;
+      const res = await apiClient.post<{ entry: MoodEntry; newBadges: WellnessBadge[] }>(
+        '/mood',
+        payload,
+      );
+      return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['mood'] });
+      queryClient.invalidateQueries({ queryKey: ['gamification', 'summary'] });
       setServerError(null);
+      setNewBadges(data.newBadges);
       reset({ ...emptyFormValues, recordedAt: todayDateInputValue() });
     },
     onError: (err) => {
@@ -118,6 +126,10 @@ export default function MoodPage() {
     <div className="space-y-8">
       <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
         <h1 className="text-2xl font-bold">Mood tracking</h1>
+
+        <div className="mt-4">
+          <NewBadgeBanner badges={newBadges} />
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
           <div>

@@ -26,6 +26,7 @@ import ResearchPage from './pages/ResearchPage';
 import SleepPage from './pages/SleepPage';
 import UserProfilePage from './pages/UserProfilePage';
 import VideosPage from './pages/VideosPage';
+import WellnessPage from './pages/WellnessPage';
 import WorkoutPlannerPage from './pages/WorkoutPlannerPage';
 
 export default function App() {
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="mood" element={<MoodPage />} />
           <Route path="sleep" element={<SleepPage />} />
           <Route path="meditation" element={<MeditationPage />} />
+          <Route path="wellness" element={<WellnessPage />} />
           <Route path="nutrition" element={<NutritionPage />} />
           <Route path="diet-plan" element={<DietPlannerPage />} />
           <Route path="recipes" element={<RecipesPage />} />
