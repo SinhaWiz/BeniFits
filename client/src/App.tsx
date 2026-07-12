@@ -22,6 +22,7 @@ import RecipeDetailPage from './pages/RecipeDetailPage';
 import RecipesPage from './pages/RecipesPage';
 import RegisterPage from './pages/RegisterPage';
 import ResearchPage from './pages/ResearchPage';
+import SleepPage from './pages/SleepPage';
 import UserProfilePage from './pages/UserProfilePage';
 import VideosPage from './pages/VideosPage';
 import WorkoutPlannerPage from './pages/WorkoutPlannerPage';
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="progress" element={<ProgressPage />} />
           <Route path="mood" element={<MoodPage />} />
+          <Route path="sleep" element={<SleepPage />} />
           <Route path="nutrition" element={<NutritionPage />} />
           <Route path="diet-plan" element={<DietPlannerPage />} />
           <Route path="recipes" element={<RecipesPage />} />

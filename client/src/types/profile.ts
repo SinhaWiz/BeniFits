@@ -21,6 +21,7 @@ export interface HealthProfile {
   activityLevel: ActivityLevel | null;
   goal: Goal | null;
   sleepHours: number | null;
+  sleepGoalHours: number | null;
   waterIntakeMl: number | null;
   diseases: string[];
   allergies: string[];
@@ -37,6 +38,7 @@ export interface HealthProfileUpdate {
   activityLevel?: ActivityLevel;
   goal?: Goal;
   sleepHours?: number;
+  sleepGoalHours?: number;
   waterIntakeMl?: number;
   diseases: string[];
   allergies: string[];

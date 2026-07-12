@@ -18,6 +18,7 @@ interface ProfileFormValues {
   activityLevel: string;
   goal: string;
   sleepHours: string;
+  sleepGoalHours: string;
   waterIntakeMl: string;
   diseases: string;
   allergies: string;
@@ -32,6 +33,7 @@ const emptyFormValues: ProfileFormValues = {
   activityLevel: '',
   goal: '',
   sleepHours: '',
+  sleepGoalHours: '',
   waterIntakeMl: '',
   diseases: '',
   allergies: '',
@@ -48,6 +50,7 @@ function profileToFormValues(profile: HealthProfile | null): ProfileFormValues {
     activityLevel: profile.activityLevel ?? '',
     goal: profile.goal ?? '',
     sleepHours: profile.sleepHours?.toString() ?? '',
+    sleepGoalHours: profile.sleepGoalHours?.toString() ?? '',
     waterIntakeMl: profile.waterIntakeMl?.toString() ?? '',
     diseases: profile.diseases.join(', '),
     allergies: profile.allergies.join(', '),
@@ -76,6 +79,7 @@ function formValuesToPayload(values: ProfileFormValues): HealthProfileUpdate {
     activityLevel: (values.activityLevel || undefined) as HealthProfileUpdate['activityLevel'],
     goal: (values.goal || undefined) as HealthProfileUpdate['goal'],
     sleepHours: toOptionalNumber(values.sleepHours),
+    sleepGoalHours: toOptionalNumber(values.sleepGoalHours),
     waterIntakeMl: toOptionalNumber(values.waterIntakeMl),
     diseases: toArray(values.diseases),
     allergies: toArray(values.allergies),
@@ -241,6 +245,19 @@ export default function ProfilePage() {
               min={0}
               className={inputClass}
               {...register('waterIntakeMl')}
+            />
+          </div>
+          <div>
+            <label htmlFor="sleepGoalHours" className={labelClass}>
+              Sleep goal (hours/night)
+            </label>
+            <input
+              id="sleepGoalHours"
+              type="number"
+              min={0}
+              step="0.5"
+              className={inputClass}
+              {...register('sleepGoalHours')}
             />
           </div>
         </fieldset>
