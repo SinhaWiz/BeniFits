@@ -12,6 +12,7 @@ import ExpertsPage from './pages/ExpertsPage';
 import FeedPage from './pages/FeedPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
+import MeditationPage from './pages/MeditationPage';
 import MoodPage from './pages/MoodPage';
 import NewsPage from './pages/NewsPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="progress" element={<ProgressPage />} />
           <Route path="mood" element={<MoodPage />} />
           <Route path="sleep" element={<SleepPage />} />
+          <Route path="meditation" element={<MeditationPage />} />
           <Route path="nutrition" element={<NutritionPage />} />
           <Route path="diet-plan" element={<DietPlannerPage />} />
           <Route path="recipes" element={<RecipesPage />} />
