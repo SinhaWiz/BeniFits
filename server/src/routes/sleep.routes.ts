@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AppError } from '../errors/AppError';
+import { checkAndAwardBadges } from '../lib/gamification';
 import { computeSleepDurationMinutes } from '../lib/sleep';
 import { prisma } from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
@@ -51,7 +52,8 @@ sleepRouter.post('/', validateBody(sleepEntrySchema), async (req, res, next) => 
       update: { bedtime: bedtimeDate, wakeTime: wakeTimeDate, durationMinutes, ...rest },
     });
 
-    res.status(201).json({ entry });
+    const newBadges = await checkAndAwardBadges(userId);
+    res.status(201).json({ entry, newBadges });
   } catch (err) {
     next(err);
   }

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AppError } from '../errors/AppError';
+import { checkAndAwardBadges } from '../lib/gamification';
 import { prisma } from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
@@ -92,7 +93,8 @@ meditationRouter.post('/logs', validateBody(meditationLogSchema), async (req, re
       include: { session: true },
     });
 
-    res.status(201).json({ log });
+    const newBadges = await checkAndAwardBadges(userId);
+    res.status(201).json({ log, newBadges });
   } catch (err) {
     next(err);
   }

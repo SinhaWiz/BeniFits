@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AppError } from '../errors/AppError';
+import { checkAndAwardBadges } from '../lib/gamification';
 import { prisma } from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
@@ -26,7 +27,8 @@ moodRouter.post('/', validateBody(moodEntrySchema), async (req, res, next) => {
       update: { ...rest },
     });
 
-    res.status(201).json({ entry });
+    const newBadges = await checkAndAwardBadges(userId);
+    res.status(201).json({ entry, newBadges });
   } catch (err) {
     next(err);
   }

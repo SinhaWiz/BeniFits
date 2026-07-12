@@ -121,6 +121,7 @@ model User {
   moodEntries       MoodEntry[]
   sleepEntries      SleepEntry[]
   meditationLogs    MeditationLog[]
+  badges            UserBadge[]
 }
 
 model MoodEntry {
@@ -303,6 +304,17 @@ model MeditationLog {
   createdAt       DateTime          @default(now())
 
   @@index([userId, completedOn])
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeKey String
+  earnedAt DateTime @default(now())
+
+  @@unique([userId, badgeKey])
+  @@index([userId])
 }
 
 model AiConversation {
