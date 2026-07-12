@@ -5,7 +5,7 @@ breakdown for every round of work completed so far. Each round maps to one
 phase of the original blueprint; each round is broken into small sub-plans,
 and every sub-plan ends in its own commit (see `git log` for exact diffs).
 
-**Status as of this writing: Phases 1–6 complete (54 commits). Phases 7–8 not started.**
+**Status as of this writing: Phases 1–7 complete (66 commits). Phase 8 not started.**
 
 ---
 
@@ -22,7 +22,7 @@ wellness platform. The full blueprint defines 8 phases:
 | 4 | Expert Marketplace — expert profiles, booking, chat, payments, consultations | ✅ Done (partial — see scope note) |
 | 5 | Community — social feed, stories, comments, follows, challenges | ✅ Done (partial — see scope note) |
 | 6 | Content Platform — daily recipes, health news, research summaries, video recommendations | ✅ Done (full scope — see note) |
-| 7 | Wellness — mood tracking, meditation, sleep tools, gamification | ⬜ Not started |
+| 7 | Wellness — mood tracking, meditation, sleep tools, gamification | ✅ Done (full scope, including the Phase 5 challenges/leaderboard deferral) |
 | 8 | Production Readiness — notifications, monitoring, CI/CD, testing, security hardening, scaling | ⬜ Not started |
 
 **Tech stack chosen:** React + Vite + TypeScript + Tailwind CSS v4, React
@@ -403,6 +403,97 @@ established in Phase 2.
 
 ---
 
+## Phase 7 — Wellness ✅ (full scope, including the Phase 5 deferral)
+
+**Goal:** all four Wellness features named in the blueprint — mood
+tracking, sleep tools, meditation, and gamification — plus the
+challenges/leaderboard feature deferred from Phase 5's Community round,
+since the user chose to fold it in here rather than ship it standalone.
+Scope was confirmed with the user up front via three targeted questions
+(gamification breadth, sleep tools vs. the existing `sleepHours` field,
+and how meditation would work with no audio infra in this codebase).
+
+| # | Sub-plan | Commit |
+|---|---|---|
+| 1 | Mood tracking API (`MoodEntry`, upsert-by-date) | `1bb4723` |
+| 2 | Mood tracking UI (emoji picker + Recharts line chart) | `622f643` |
+| 3 | Sleep tools API (`SleepEntry` + `sleepGoalHours` on `HealthProfile`) | `72db901` |
+| 4 | Sleep tools UI (bedtime/wake form + duration bar chart with goal line) | `eee95d3` |
+| 5 | Meditation API (18-session seeded library + `MeditationLog`) | `23001cf` |
+| 6 | Meditation UI (category browser + countdown timer modal) | `d967756` |
+| 7 | Gamification core API (streaks + badges) | `ad501dc` |
+| 8 | Gamification UI (wellness dashboard) | `ed22c93` |
+| 9 | Challenges + leaderboard API | `bbd876b` |
+| 10 | Challenges + leaderboard UI | `b032784` |
+| 11 | Backend tests (all five Phase 7 APIs) | `5a5a471` |
+| 12 | Frontend tests (all six new pages) | `503caeb` |
+
+**Scope, as confirmed with the user up front:**
+- **Gamification** covers the full breadth named across Phases 5 and 7:
+  streaks, badges, *and* challenges/leaderboard — the user explicitly chose
+  to close out the Phase 5 deferral here rather than leave it standalone.
+- **Sleep tools** got a dedicated `SleepEntry` model (bedtime, wake time,
+  server-computed duration, 1-5 quality rating) plus a `sleepGoalHours`
+  field on `HealthProfile`, rather than building on top of the existing
+  `ProgressEntry.sleepHours` / `HealthProfile.sleepHours` fields, which
+  only ever captured a single "typical hours" number.
+- **Meditation** is a guided session library (18 seeded sessions across 6
+  categories: breathing, body scan, sleep, focus, stress relief,
+  mindfulness) with a client-side countdown timer — no audio/video files,
+  since no file storage or CDN infra exists anywhere in this codebase.
+
+**Key decisions / things found along the way:**
+- Mood, sleep, and meditation all follow the exact `ProgressEntry`
+  upsert-by-date pattern from Phase 2 — except meditation, which
+  deliberately allows multiple log entries per day (no unique constraint),
+  since meditating more than once a day is normal in a way that logging
+  two different weights for the same day isn't.
+- **Gamification stays purely computed, no cron or stored aggregates** —
+  consistent with how BMI and the workout generator already worked in this
+  codebase. `lib/gamification.ts` computes the current streak (consecutive
+  days with any mood/sleep/meditation activity, not broken by a not-yet-
+  logged "today" until yesterday is also missed — the common
+  Duolingo-style streak convention) and evaluates a fixed in-code catalog
+  of 10 badge definitions against live counts every time a wellness entry
+  is logged, awarding any newly met one via `checkAndAwardBadges()`.
+- The `UserBadge` unique constraint (`userId` + `badgeKey`) is guarded the
+  same way Phase 4's `getOrCreateConversation` guards its own race: a
+  `PrismaClientKnownRequestError` `P2002` catch, not a pre-check alone —
+  necessary because the "already earned?" check and the award itself
+  aren't atomic against a genuine concurrent double-request.
+- Challenges reuse the same demo-seed-data pattern as Phase 4's expert
+  accounts (`server/prisma/seed.ts`) since this codebase still has no
+  admin panel or self-serve content creation for anything. Four demo
+  challenges are seeded, one per `ChallengeMetric`
+  (`MEDITATION_MINUTES`/`MOOD_LOGS`/`SLEEP_LOGS`/`ACTIVE_DAYS`), with
+  rolling start/end dates computed at seed time so they stay "currently
+  running" whenever the seed is first run.
+- Leaderboard progress is computed live per participant
+  (`computeChallengeProgress()`, reusing the same per-feature count/
+  aggregate queries the badges use) over `[challenge.startsAt, min(now,
+  challenge.endsAt)]` — no stored/cached progress counters to keep in
+  sync.
+- The sleep goal is edited on the existing Profile page (Phase 1), not
+  duplicated as a separate settings flow on the new Sleep page — the same
+  reasoning as Phase 6's diet-plan integration reusing an existing
+  full-replace endpoint instead of adding a parallel one.
+- Regenerating the Prisma client (`npx prisma generate`) after every
+  schema change was required *in addition to* `prisma migrate dev` in this
+  session — the migration applied cleanly each time but the generated
+  client under `server/src/generated/prisma` (gitignored, custom output
+  path) didn't pick up the new models until `generate` was run explicitly,
+  causing a `Cannot read properties of undefined (reading 'upsert')`
+  runtime error on the very first mood-tracking curl check. Every
+  subsequent schema sub-plan ran `generate` immediately after `migrate
+  dev` to avoid repeating this.
+- All 12 sub-plans were verified end-to-end via curl against the real
+  running stack (registering test users, exercising upsert/validation/
+  ownership-scoping/404 paths) before being committed, plus a client
+  production build (`vite build`) and a `tsc --noEmit` pass after every
+  frontend sub-plan — the same discipline as every prior phase.
+
+---
+
 ## Cross-cutting infrastructure notes (apply to all phases)
 
 - **Database:** PostgreSQL via Docker Compose (`docker compose up -d`),
@@ -424,11 +515,12 @@ established in Phase 2.
 - **Testing:** every feature round ends in its own test sub-plan. Server
   tests mock external APIs (USDA, Anthropic, and Phase 6's four content
   clients) via `vi.mock` so the suite never depends on live network access
-  or real credentials; Phase 4's messaging tests and all of Phase 5's
-  tests are exceptions that hit a real Postgres test DB with no mocking,
-  since nothing external is being called. `npm test` from the repo root
-  runs both workspaces; currently 109 tests total (86 server + 23 client),
-  all green and confirmed stable across repeated runs. `client/tests/
+  or real credentials; Phase 4's messaging tests, all of Phase 5's tests,
+  and all of Phase 7's tests are exceptions that hit a real Postgres test
+  DB with no mocking, since nothing external is being called. `npm test`
+  from the repo root runs both workspaces; currently 142 tests total (113
+  server + 29 client), all green and confirmed stable across repeated
+  runs. `client/tests/
   setup.ts` explicitly wires `afterEach(cleanup)` from Testing Library
   (Phase 5 found `test.globals` isn't enabled, so the automatic version
   never registered) — any new multi-test file benefits from this without
@@ -450,8 +542,8 @@ established in Phase 2.
    provider for consultations, plus self-serve expert onboarding (currently
    demo accounts only, provisioned via the seed script).
 3. **Community follow-up (deferred from Phase 5):** ephemeral 24h stories
-   and challenges/leaderboard — challenges likely gets built alongside
-   Phase 7's gamification instead of as a standalone add-on.
+   are still not built — challenges/leaderboard, the other Phase 5
+   deferral, shipped as part of Phase 7 instead of standalone.
 4. **Add real API keys** for Phase 6's four content integrations
    (`SPOONACULAR_API_KEY`, `NEWS_API_KEY`, `YOUTUBE_API_KEY`, and
    optionally `PUBMED_API_KEY` for a higher rate limit) to `server/.env`
@@ -459,12 +551,16 @@ established in Phase 2.
    the graceful-503 path for the three key-gated clients, plus one real
    live PubMed call, but full response-shape verification for Spoonacular/
    NewsAPI/YouTube needs real keys.
-5. **Phase 7 — Wellness:** mood/sleep tracking, meditation, gamification.
+5. **Phase 7 follow-up:** no real follow-up items were deferred — the
+   round shipped its full confirmed scope, including the Phase 5
+   challenges/leaderboard deferral. The one open item is cosmetic: the
+   meditation timer only logs a session's full nominal duration, never a
+   partial one, even if the user hits "Complete now" early.
 6. **Phase 8 — Production Readiness:** notifications (push/email/SMS),
    monitoring (Sentry/Prometheus), CI/CD, security hardening, deployment.
    Should happen before any real users touch the app in production.
 
-Each of these, when started, will get the same treatment as Phases 1–6:
+Each of these, when started, will get the same treatment as Phases 1–7:
 scope confirmed with the user, broken into small sub-plans, each sub-plan
 verified end-to-end and committed on its own — and this file updated to
 reflect the new state.
