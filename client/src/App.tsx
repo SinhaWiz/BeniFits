@@ -4,6 +4,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AiChatPage from './pages/AiChatPage';
 import AiWeightLossCoachPage from './pages/AiWeightLossCoachPage';
 import AppointmentsPage from './pages/AppointmentsPage';
+import ChallengeDetailPage from './pages/ChallengeDetailPage';
+import ChallengesPage from './pages/ChallengesPage';
 import ConversationPage from './pages/ConversationPage';
 import DietPlannerPage from './pages/DietPlannerPage';
 import ExpertDashboardPage from './pages/ExpertDashboardPage';
@@ -45,6 +47,8 @@ export default function App() {
           <Route path="sleep" element={<SleepPage />} />
           <Route path="meditation" element={<MeditationPage />} />
           <Route path="wellness" element={<WellnessPage />} />
+          <Route path="challenges" element={<ChallengesPage />} />
+          <Route path="challenges/:id" element={<ChallengeDetailPage />} />
           <Route path="nutrition" element={<NutritionPage />} />
           <Route path="diet-plan" element={<DietPlannerPage />} />
           <Route path="recipes" element={<RecipesPage />} />
