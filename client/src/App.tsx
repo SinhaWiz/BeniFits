@@ -12,6 +12,7 @@ import ExpertsPage from './pages/ExpertsPage';
 import FeedPage from './pages/FeedPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
+import MoodPage from './pages/MoodPage';
 import NewsPage from './pages/NewsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import NutritionPage from './pages/NutritionPage';
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="users/:id" element={<UserProfilePage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="progress" element={<ProgressPage />} />
+          <Route path="mood" element={<MoodPage />} />
           <Route path="nutrition" element={<NutritionPage />} />
           <Route path="diet-plan" element={<DietPlannerPage />} />
           <Route path="recipes" element={<RecipesPage />} />

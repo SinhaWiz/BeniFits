@@ -36,6 +36,9 @@ export default function Layout() {
                 <NavLink to="/progress" className={navLinkClass}>
                   Progress
                 </NavLink>
+                <NavLink to="/mood" className={navLinkClass}>
+                  Mood
+                </NavLink>
                 <NavLink to="/nutrition" className={navLinkClass}>
                   Nutrition
                 </NavLink>
