@@ -1,6 +1,9 @@
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 import { prisma } from './lib/prisma';
 import { errorHandler } from './middleware/errorHandler';
 import { aiChatRouter } from './routes/aiChat.routes';
@@ -28,8 +31,30 @@ import { workoutPlanRouter } from './routes/workoutPlan.routes';
 
 export const app = express();
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+const corsOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(helmet());
+app.use(cors({ origin: corsOrigins, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', (req, res, next) => {
+  if (req.path === '/health') return next();
+  return globalLimiter(req, res, next);
+});
 
 app.get('/api/health', async (_req, res) => {
   let dbConnected = true;
