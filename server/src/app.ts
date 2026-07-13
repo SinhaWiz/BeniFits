@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { logger } from './lib/logger';
+import { metricsMiddleware, metricsRegistry } from './lib/metrics';
 import { prisma } from './lib/prisma';
 import { isSentryEnabled } from './lib/sentry';
 import { errorHandler } from './middleware/errorHandler';
@@ -47,6 +48,7 @@ const corsOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
 app.use(helmet());
 app.use(cors({ origin: corsOrigins, credentials: true }));
 app.use(pinoHttp({ logger }));
+app.use(metricsMiddleware);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -57,8 +59,17 @@ const globalLimiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/api', (req, res, next) => {
-  if (req.path === '/health') return next();
+  if (req.path === '/health' || req.path === '/metrics') return next();
   return globalLimiter(req, res, next);
+});
+
+app.get('/api/metrics', async (_req, res, next) => {
+  try {
+    res.set('Content-Type', metricsRegistry.contentType);
+    res.send(await metricsRegistry.metrics());
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.get('/api/health', async (_req, res) => {
