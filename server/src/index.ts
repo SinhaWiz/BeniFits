@@ -1,3 +1,4 @@
+import './instrument';
 import { createServer } from 'http';
 import { app } from './app';
 import { logger } from './lib/logger';

@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
+import * as Sentry from '@sentry/node';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
@@ -7,6 +8,7 @@ import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { logger } from './lib/logger';
 import { prisma } from './lib/prisma';
+import { isSentryEnabled } from './lib/sentry';
 import { errorHandler } from './middleware/errorHandler';
 import { aiChatRouter } from './routes/aiChat.routes';
 import { aiWeightLossPlanRouter } from './routes/aiWeightLossPlan.routes';
@@ -104,4 +106,7 @@ app.use('/api/meditation', meditationRouter);
 app.use('/api/gamification', gamificationRouter);
 app.use('/api/challenges', challengeRouter);
 
+if (isSentryEnabled()) {
+  Sentry.setupExpressErrorHandler(app);
+}
 app.use(errorHandler);
