@@ -23,6 +23,7 @@ import { gamificationRouter } from './routes/gamification.routes';
 import { meditationRouter } from './routes/meditation.routes';
 import { moodRouter } from './routes/mood.routes';
 import { newsRouter } from './routes/news.routes';
+import { notificationRouter } from './routes/notification.routes';
 import { nutritionRouter } from './routes/nutrition.routes';
 import { postsRouter } from './routes/posts.routes';
 import { profileRouter } from './routes/profile.routes';
@@ -116,6 +117,7 @@ app.use('/api/sleep', sleepRouter);
 app.use('/api/meditation', meditationRouter);
 app.use('/api/gamification', gamificationRouter);
 app.use('/api/challenges', challengeRouter);
+app.use('/api/notifications', notificationRouter);
 
 if (isSentryEnabled()) {
   Sentry.setupExpressErrorHandler(app);

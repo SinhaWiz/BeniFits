@@ -89,6 +89,13 @@ enum ChallengeMetric {
   ACTIVE_DAYS
 }
 
+enum NotificationType {
+  APPOINTMENT_BOOKED
+  APPOINTMENT_CONFIRMED
+  APPOINTMENT_CANCELLED
+  BADGE_EARNED
+}
+
 enum SlotStatus {
   OPEN
   BOOKED
@@ -130,6 +137,7 @@ model User {
   meditationLogs    MeditationLog[]
   badges            UserBadge[]
   challenges        ChallengeParticipant[]
+  notifications     Notification[]
 }
 
 model MoodEntry {
@@ -348,6 +356,20 @@ model ChallengeParticipant {
 
   @@unique([challengeId, userId])
   @@index([challengeId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, read])
 }
 
 model AiConversation {

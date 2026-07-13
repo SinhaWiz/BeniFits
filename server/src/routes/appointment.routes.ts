@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AppError } from '../errors/AppError';
+import { createNotification } from '../lib/notifications';
 import { prisma } from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
@@ -46,6 +47,13 @@ appointmentRouter.post('/', validateBody(createAppointmentSchema), async (req, r
         include: appointmentInclude,
       });
     });
+
+    await createNotification(
+      appointment.expertProfile.user.id,
+      'APPOINTMENT_BOOKED',
+      'New appointment booked',
+      `${appointment.client.name ?? 'A client'} booked an appointment with you.`,
+    );
 
     res.status(201).json({ appointment });
   } catch (err) {
@@ -137,6 +145,26 @@ appointmentRouter.patch(
           include: appointmentInclude,
         });
       });
+
+      if (status === 'CONFIRMED') {
+        await createNotification(
+          updated.client.id,
+          'APPOINTMENT_CONFIRMED',
+          'Appointment confirmed',
+          `${updated.expertProfile.user.name ?? 'Your expert'} confirmed your appointment.`,
+        );
+      } else if (status === 'CANCELLED') {
+        const recipientId = isClient ? updated.expertProfile.user.id : updated.client.id;
+        const actorName = isClient
+          ? (updated.client.name ?? 'The client')
+          : (updated.expertProfile.user.name ?? 'The expert');
+        await createNotification(
+          recipientId,
+          'APPOINTMENT_CANCELLED',
+          'Appointment cancelled',
+          `${actorName} cancelled the appointment.`,
+        );
+      }
 
       res.json({ appointment: updated });
     } catch (err) {

@@ -1,5 +1,6 @@
 import type { ChallengeMetric } from '../generated/prisma/enums';
 import { PrismaClientKnownRequestError } from '../generated/prisma/internal/prismaNamespace';
+import { createNotification } from './notifications';
 import { prisma } from './prisma';
 
 export interface WellnessCounts {
@@ -141,6 +142,12 @@ export async function checkAndAwardBadges(userId: string): Promise<BadgeDefiniti
     try {
       await prisma.userBadge.create({ data: { userId, badgeKey: badge.key } });
       newlyEarned.push(badge);
+      await createNotification(
+        userId,
+        'BADGE_EARNED',
+        `New badge: ${badge.name}`,
+        badge.description,
+      );
     } catch (err) {
       if (!(err instanceof PrismaClientKnownRequestError && err.code === 'P2002')) throw err;
     }
