@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useAuth } from '../auth/AuthContext';
 import { EXPERT_ROLES } from '../types/expert';
+import { NotificationBell } from './NotificationBell';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-full px-4 py-2 text-sm font-medium transition-colors ${
@@ -89,6 +90,7 @@ export default function Layout() {
                     Expert Dashboard
                   </NavLink>
                 )}
+                <NotificationBell />
                 <span className="px-2 text-sm text-slate-400">{user.name ?? user.email}</span>
                 <button
                   type="button"
