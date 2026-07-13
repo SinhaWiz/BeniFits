@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { apiClient } from '../lib/apiClient';
+import {
+  getCurrentSubscription,
+  getPushStatus,
+  isPushSupported,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from '../lib/push';
 import type { Notification } from '../types/notification';
 
 function timeAgo(iso: string): string {
@@ -46,8 +53,34 @@ export function NotificationBell() {
     },
   });
 
+  const pushStatusQuery = useQuery({
+    queryKey: ['push', 'status'],
+    queryFn: getPushStatus,
+    enabled: isPushSupported(),
+  });
+
+  const subscriptionQuery = useQuery({
+    queryKey: ['push', 'subscription'],
+    queryFn: async () => Boolean(await getCurrentSubscription()),
+    enabled: isPushSupported(),
+  });
+
+  const togglePushMutation = useMutation({
+    mutationFn: async () => {
+      if (subscriptionQuery.data) {
+        await unsubscribeFromPush();
+      } else if (pushStatusQuery.data?.publicKey) {
+        await subscribeToPush(pushStatusQuery.data.publicKey);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['push', 'subscription'] });
+    },
+  });
+
   const notifications = notificationsQuery.data?.notifications ?? [];
   const unreadCount = notificationsQuery.data?.unreadCount ?? 0;
+  const canOfferPush = isPushSupported() && pushStatusQuery.data?.enabled;
 
   return (
     <div className="relative">
@@ -79,6 +112,19 @@ export function NotificationBell() {
               </button>
             )}
           </div>
+
+          {canOfferPush && (
+            <button
+              type="button"
+              onClick={() => togglePushMutation.mutate()}
+              disabled={togglePushMutation.isPending}
+              className="mb-2 w-full rounded-lg border border-white/10 px-2 py-1.5 text-left text-xs font-medium text-slate-300 transition-colors hover:border-white/20 hover:text-white disabled:opacity-60"
+            >
+              {subscriptionQuery.data
+                ? '🔕 Disable browser notifications'
+                : '🔔 Enable browser notifications'}
+            </button>
+          )}
 
           {notifications.length === 0 ? (
             <p className="px-1 py-4 text-sm text-slate-400">No notifications yet.</p>

@@ -2,6 +2,7 @@ import type { NotificationType } from '../generated/prisma/enums';
 import { sendEmail } from './email';
 import { logger } from './logger';
 import { prisma } from './prisma';
+import { sendPushToUser } from './push';
 
 export async function createNotification(
   userId: string,
@@ -17,6 +18,10 @@ export async function createNotification(
     .catch((err) => {
       logger.error({ err, userId, type }, 'Failed to send notification email');
     });
+
+  sendPushToUser(userId, { title, body }).catch((err) => {
+    logger.error({ err, userId, type }, 'Failed to send push notification');
+  });
 
   return notification;
 }
