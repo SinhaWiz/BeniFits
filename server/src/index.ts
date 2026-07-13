@@ -1,5 +1,6 @@
 import { createServer } from 'http';
 import { app } from './app';
+import { logger } from './lib/logger';
 import { prisma } from './lib/prisma';
 import { attachSocket } from './lib/socket';
 
@@ -9,7 +10,7 @@ const httpServer = createServer(app);
 attachSocket(httpServer);
 
 httpServer.listen(port, () => {
-  console.log(`API server listening on http://localhost:${port}`);
+  logger.info(`API server listening on http://localhost:${port}`);
 });
 
 process.on('SIGTERM', async () => {

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { buildNutritionSystemPrompt, CLAUDE_MODEL, getClaudeClient } from '../lib/claude';
+import { logger } from '../lib/logger';
 import { prisma } from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
@@ -122,7 +123,7 @@ aiChatRouter.post(
 
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
     } catch (streamErr) {
-      console.error('AI chat stream error:', streamErr);
+      (req.log ?? logger).error({ err: streamErr }, 'AI chat stream error');
       res.write(
         `data: ${JSON.stringify({ error: 'The AI assistant failed to respond. Please try again.' })}\n\n`,
       );

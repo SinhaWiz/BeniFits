@@ -4,6 +4,8 @@ import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import pinoHttp from 'pino-http';
+import { logger } from './lib/logger';
 import { prisma } from './lib/prisma';
 import { errorHandler } from './middleware/errorHandler';
 import { aiChatRouter } from './routes/aiChat.routes';
@@ -42,6 +44,7 @@ const corsOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
 
 app.use(helmet());
 app.use(cors({ origin: corsOrigins, credentials: true }));
+app.use(pinoHttp({ logger }));
 app.use(express.json());
 app.use(cookieParser());
 
