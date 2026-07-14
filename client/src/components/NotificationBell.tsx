@@ -88,7 +88,7 @@ export function NotificationBell() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label="Notifications"
-        className="relative rounded-full px-3 py-2 text-sm text-slate-300 transition-colors hover:text-white"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm shadow-slate-200/60 transition-colors hover:text-slate-900"
       >
         <span aria-hidden="true">🔔</span>
         {unreadCount > 0 && (
@@ -99,14 +99,14 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 rounded-2xl border border-white/10 bg-slate-900 p-3 shadow-2xl">
+        <div className="absolute right-0 z-50 mt-2 w-80 rounded-3xl border border-slate-100 bg-white p-3 shadow-xl shadow-slate-300/40">
           <div className="flex items-center justify-between px-1 pb-2">
-            <span className="text-sm font-semibold text-slate-200">Notifications</span>
+            <span className="text-sm font-semibold text-slate-900">Notifications</span>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={() => markAllReadMutation.mutate()}
-                className="text-xs font-medium text-sky-400 hover:text-sky-300"
+                className="text-xs font-medium text-blue-600 hover:text-blue-500"
               >
                 Mark all read
               </button>
@@ -118,7 +118,7 @@ export function NotificationBell() {
               type="button"
               onClick={() => togglePushMutation.mutate()}
               disabled={togglePushMutation.isPending}
-              className="mb-2 w-full rounded-lg border border-white/10 px-2 py-1.5 text-left text-xs font-medium text-slate-300 transition-colors hover:border-white/20 hover:text-white disabled:opacity-60"
+              className="mb-2 w-full rounded-xl border border-slate-200 px-2 py-1.5 text-left text-xs font-medium text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-900 disabled:opacity-60"
             >
               {subscriptionQuery.data
                 ? '🔕 Disable browser notifications'
@@ -127,7 +127,7 @@ export function NotificationBell() {
           )}
 
           {notifications.length === 0 ? (
-            <p className="px-1 py-4 text-sm text-slate-400">No notifications yet.</p>
+            <p className="px-1 py-4 text-sm text-slate-500">No notifications yet.</p>
           ) : (
             <ul className="max-h-96 space-y-1 overflow-y-auto">
               {notifications.map((notification) => (
@@ -135,15 +135,15 @@ export function NotificationBell() {
                   <button
                     type="button"
                     onClick={() => !notification.read && markReadMutation.mutate(notification.id)}
-                    className={`w-full rounded-lg px-2 py-2 text-left text-sm transition-colors ${
+                    className={`w-full rounded-xl px-2 py-2 text-left text-sm transition-colors ${
                       notification.read
-                        ? 'text-slate-400 hover:bg-white/5'
-                        : 'bg-sky-500/10 text-slate-100 hover:bg-sky-500/20'
+                        ? 'text-slate-500 hover:bg-slate-50'
+                        : 'bg-blue-50 text-slate-900 hover:bg-blue-100/70'
                     }`}
                   >
                     <p className="font-medium">{notification.title}</p>
-                    <p className="mt-0.5 text-xs text-slate-400">{notification.body}</p>
-                    <p className="mt-1 text-[11px] text-slate-500">
+                    <p className="mt-0.5 text-xs text-slate-500">{notification.body}</p>
+                    <p className="mt-1 text-[11px] text-slate-400">
                       {timeAgo(notification.createdAt)}
                     </p>
                   </button>
