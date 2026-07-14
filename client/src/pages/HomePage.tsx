@@ -1,47 +1,33 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { Card } from '../components/ui';
+import { useAuth } from '../auth/AuthContext';
+import { Button } from '../components/ui';
 
-const FEATURE_HIGHLIGHTS = [
+// three.js is a large, decorative dependency — only load it for this page.
+const HeroBackground = lazy(() =>
+  import('../components/HeroBackground').then((module) => ({ default: module.HeroBackground })),
+);
+
+const PILLARS = [
   {
-    to: '/wellness',
     icon: '🧘',
-    title: 'Wellness',
-    description: 'Track mood, sleep, and meditation. Build streaks and earn badges.',
+    title: 'Track your health',
+    description: 'Mood, sleep, meditation, nutrition, and workouts, all in one place.',
   },
   {
-    to: '/nutrition',
-    icon: '🥗',
-    title: 'Nutrition',
-    description: 'Search foods, build diet plans, and browse recipes.',
-  },
-  {
-    to: '/ai-nutritionist',
     icon: '🤖',
-    title: 'AI Coach',
-    description: 'Chat with an AI nutritionist and get a personalized weight-loss plan.',
+    title: 'AI-powered coaching',
+    description: 'A nutritionist chat and a weight-loss coach, available whenever you need them.',
   },
   {
-    to: '/experts',
     icon: '🩺',
-    title: 'Experts',
-    description: 'Book a session with a nutritionist, doctor, or coach.',
-  },
-  {
-    to: '/feed',
-    icon: '📰',
-    title: 'Community',
-    description: 'Share progress, follow others, and join the conversation.',
-  },
-  {
-    to: '/challenges',
-    icon: '🏆',
-    title: 'Challenges',
-    description: 'Join a challenge and climb the leaderboard.',
+    title: 'Experts & community',
+    description: 'Book real experts, join challenges, and share progress with others.',
   },
 ];
 
 export default function HomePage() {
+  const { user } = useAuth();
   const [message, setMessage] = useState('Loading health status...');
 
   useEffect(() => {
@@ -69,33 +55,47 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="space-y-8">
-      <Card className="p-12">
-        <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-blue-600 uppercase">
+    <div className="relative">
+      <Suspense fallback={null}>
+        <HeroBackground />
+      </Suspense>
+
+      <section className="relative z-10 flex min-h-[75vh] flex-col justify-center px-2 py-16 sm:px-4">
+        <p className="mb-4 text-sm font-semibold tracking-[0.2em] text-blue-600 uppercase">
           BeniFits
         </p>
-        <h1 className="text-5xl leading-tight font-bold text-balance text-slate-900 sm:text-6xl">
+        <h1 className="max-w-3xl text-6xl leading-[1.05] font-bold text-balance text-slate-900 sm:text-7xl lg:text-8xl">
           Your complete health &amp; wellness platform
         </h1>
-        <p className="mt-4 max-w-2xl text-lg text-slate-500">{message}</p>
-      </Card>
+        <p className="mt-6 max-w-xl text-xl text-slate-500">{message}</p>
 
-      <div>
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">Explore</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURE_HIGHLIGHTS.map((feature) => (
-            <Link key={feature.to} to={feature.to}>
-              <Card className="h-full p-6 transition-shadow hover:shadow-md hover:shadow-slate-200">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-xl">
-                  <span aria-hidden="true">{feature.icon}</span>
-                </span>
-                <h3 className="mt-4 font-semibold text-slate-900">{feature.title}</h3>
-                <p className="mt-1 text-sm text-slate-500">{feature.description}</p>
-              </Card>
+        {!user && (
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Link to="/register">
+              <Button variant="primary" className="text-base">
+                Get started
+              </Button>
             </Link>
-          ))}
-        </div>
-      </div>
+            <Link to="/login">
+              <Button variant="secondary" className="text-base">
+                Sign in
+              </Button>
+            </Link>
+          </div>
+        )}
+      </section>
+
+      <section className="relative z-10 grid grid-cols-1 gap-x-8 gap-y-10 border-t border-slate-200/70 py-14 sm:grid-cols-3">
+        {PILLARS.map((pillar) => (
+          <div key={pillar.title}>
+            <span className="text-2xl" aria-hidden="true">
+              {pillar.icon}
+            </span>
+            <h2 className="mt-3 font-semibold text-slate-900">{pillar.title}</h2>
+            <p className="mt-1 text-sm text-slate-500">{pillar.description}</p>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }

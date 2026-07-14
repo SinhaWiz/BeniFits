@@ -94,15 +94,15 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen gap-6 p-4 sm:p-6">
-      <aside className="sticky top-6 flex h-[calc(100vh-3rem)] w-20 flex-col items-center gap-2 rounded-3xl border border-slate-200/70 bg-white py-6 shadow-sm shadow-slate-200/60">
-        <Link
-          to="/"
-          className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white"
-        >
-          B+
-        </Link>
+      {user && (
+        <aside className="sticky top-6 flex h-[calc(100vh-3rem)] w-20 flex-col items-center gap-2 rounded-3xl border border-slate-200/70 bg-white py-6 shadow-sm shadow-slate-200/60">
+          <Link
+            to="/"
+            className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white"
+          >
+            B+
+          </Link>
 
-        {user && (
           <nav className="flex flex-1 flex-col items-center gap-2">
             <NavLink to="/" end className={sidebarIconClass} title="Home" aria-label="Home">
               <span aria-hidden="true">🏠</span>
@@ -128,11 +128,7 @@ export default function Layout() {
               <span aria-hidden="true">⊞</span>
             </button>
           </nav>
-        )}
 
-        {!user && <div className="flex-1" />}
-
-        {user && (
           <div className="flex flex-col items-center gap-2">
             <NavLink to="/profile" className={sidebarIconClass} title="Profile" aria-label="Profile">
               <span aria-hidden="true">👤</span>
@@ -147,8 +143,8 @@ export default function Layout() {
               <span aria-hidden="true">⏻</span>
             </button>
           </div>
-        )}
-      </aside>
+        </aside>
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="mb-6 flex items-center justify-end gap-3">
