@@ -5,7 +5,7 @@ import { logger } from './lib/logger';
 import { prisma } from './lib/prisma';
 import { attachSocket } from './lib/socket';
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 4879;
 
 const httpServer = createServer(app);
 attachSocket(httpServer);
