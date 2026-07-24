@@ -28,9 +28,11 @@ wellness platform. The full blueprint defines 8 phases:
 **Tech stack chosen:** React + Vite + TypeScript + Tailwind CSS v4, React
 Router v7, TanStack Query, React Hook Form + Zod, Recharts (frontend);
 Node.js + Express + TypeScript, Prisma 7 (driver adapters) + PostgreSQL,
-JWT auth, Docker Compose for local Postgres (backend); Anthropic Claude API
-(`@anthropic-ai/sdk`, model `claude-opus-4-8`) for AI features; Vitest +
-Supertest + Testing Library for tests across both workspaces.
+JWT auth, Docker Compose for local Postgres (backend); Google Gemini API
+(`@google/genai`, model `gemini-2.5-flash`) for AI features — originally
+built on Anthropic Claude in Phase 3, migrated on 2026-07-24 (see Phase 3's
+addendum); Vitest + Supertest + Testing Library for tests across both
+workspaces.
 
 **Working method:** each phase is scoped down from the full blueprint
 description into a tight, realistic round (confirmed with the user up
@@ -166,6 +168,27 @@ reaches the browser.
   flicker on send.
 - Found and fixed a real jsdom gap (`scrollIntoView` not implemented) with
   a minimal polyfill in the shared client test setup.
+
+**Addendum (2026-07-24): migrated from Claude to Gemini.** At the user's
+request, both AI features were moved from `@anthropic-ai/sdk`
+(`claude-opus-4-8`) to `@google/genai` (`gemini-2.5-flash`) — see commit
+`11d36de`. `lib/claude.ts` → `lib/gemini.ts`, same lazy-key/graceful-503
+pattern, same safety-rule system prompt, same SSE wire format for chat (no
+client-side change needed). Structured output now goes through
+`config.responseSchema` (a hand-built JSON schema, since the SDK doesn't
+accept a Zod schema directly) + `JSON.parse()` + the existing Zod schema
+for validation, rather than trusting an SDK-level "already parsed" claim
+like Anthropic's `zodOutputFormat` did.
+Found a real CJS/ESM friction point doing this: `@google/genai` is
+ESM-only while `server/` is a CommonJS package, and even a *type-only*
+`import type { Schema }` trips TypeScript's Node16 `resolution-mode`
+error under this setup. Fixed by dynamic `import()`-ing the SDK only
+inside `getGeminiClient()` (now async) and describing the client with a
+small local interface instead of importing the SDK's own types anywhere
+— TypeScript's own error message suggests exactly this fix.
+`GEMINI_API_KEY` is not yet configured in `server/.env`, so — same caveat
+as Claude before it — live generation quality is unverified, only the
+graceful-503 path and the (updated) mocked test suite.
 
 ---
 
@@ -630,15 +653,15 @@ monitoring infra, how to handle deployment with no hosting target chosen).
   `server/src/schemas/`.
 - **Errors:** `errors/AppError.ts` + `middleware/errorHandler.ts` — a
   single centralized JSON error shape across the whole API.
-- **External API keys / lazy integrations:** USDA, Anthropic, Spoonacular,
-  NewsAPI, PubMed, and YouTube (Phases 2/3/6), plus Phase 8's SMTP,
-  Sentry, and VAPID push keys, all live in `server/.env` (gitignored,
-  never committed) and are read lazily — either a clean `AppError(503)`
-  for request-scoped features, or a silent no-op for background ones like
-  email/push/Sentry init — rather than crashing the server or failing
-  opaquely if unset.
+- **External API keys / lazy integrations:** USDA, Gemini (originally
+  Anthropic, migrated 2026-07-24), Spoonacular, NewsAPI, PubMed, and
+  YouTube (Phases 2/3/6), plus Phase 8's SMTP, Sentry, and VAPID push
+  keys, all live in `server/.env` (gitignored, never committed) and are
+  read lazily — either a clean `AppError(503)` for request-scoped
+  features, or a silent no-op for background ones like email/push/Sentry
+  init — rather than crashing the server or failing opaquely if unset.
 - **Testing:** every feature round ends in its own test sub-plan. Server
-  tests mock external APIs (USDA, Anthropic, and Phase 6's four content
+  tests mock external APIs (USDA, Gemini, and Phase 6's four content
   clients) via `vi.mock` so the suite never depends on live network access
   or real credentials — Phase 8's email/push tests need no mocking at all,
   since `.env.test` sets neither SMTP nor VAPID keys, so those code paths
@@ -646,7 +669,7 @@ monitoring infra, how to handle deployment with no hosting target chosen).
   of Phase 5's tests, and all of Phase 7/8's tests are exceptions that hit
   a real Postgres test DB with no mocking, since nothing external is being
   called. `npm test` from the repo root runs both workspaces; currently
-  159 tests total (128 server + 31 client), all green and confirmed
+  160 tests total (129 server + 31 client), all green and confirmed
   stable across repeated runs. `client/tests/
   setup.ts` explicitly wires `afterEach(cleanup)` from Testing Library
   (Phase 5 found `test.globals` isn't enabled, so the automatic version
@@ -660,10 +683,12 @@ monitoring infra, how to handle deployment with no hosting target chosen).
 
 ## Next steps
 
-1. **Add a real `ANTHROPIC_API_KEY`** to `server/.env` and spot-check the
+1. **Add a real `GEMINI_API_KEY`** to `server/.env` and spot-check the
    two AI features live: send a chat message and confirm a grounded,
    appropriately-disclaimed streamed reply; generate a weight-loss plan and
-   confirm the week-by-week numbers are sane for a given profile.
+   confirm the week-by-week numbers are sane for a given profile. (Provider
+   migrated from Anthropic Claude to Google Gemini on 2026-07-24 — see
+   Phase 3's addendum.)
 2. **Expert Marketplace follow-up (deferred from Phase 4):** real payment
    processing (Stripe vs. SSLCommerz per the blueprint) and a video call
    provider for consultations, plus self-serve expert onboarding (currently
