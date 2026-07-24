@@ -37,6 +37,6 @@ COPY --from=builder /app/server/prisma.config.ts ./server/prisma.config.ts
 COPY --from=builder /app/server/prisma ./server/prisma
 COPY --from=builder /app/server/dist ./server/dist
 
-EXPOSE 3001
+EXPOSE 4879
 WORKDIR /app/server
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
