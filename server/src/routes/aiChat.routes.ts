@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { buildNutritionSystemPrompt, CLAUDE_MODEL, getClaudeClient } from '../lib/claude';
+import { buildNutritionSystemPrompt, GEMINI_MODEL, getGeminiClient } from '../lib/gemini';
 import { logger } from '../lib/logger';
 import { prisma } from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
@@ -59,11 +59,11 @@ aiChatRouter.post(
 
     let conversationId: string;
     let systemPrompt: string;
-    let anthropicMessages: { role: 'user' | 'assistant'; content: string }[];
-    let claudeClient: ReturnType<typeof getClaudeClient>;
+    let geminiContents: { role: 'user' | 'model'; parts: { text: string }[] }[];
+    let geminiClient: Awaited<ReturnType<typeof getGeminiClient>>;
 
     try {
-      claudeClient = getClaudeClient();
+      geminiClient = await getGeminiClient();
       const { message } = req.body as ReturnType<typeof sendChatMessageSchema.parse>;
 
       const conversation = await getOrCreateConversation(userId);
@@ -83,9 +83,9 @@ aiChatRouter.post(
       ]);
 
       systemPrompt = buildNutritionSystemPrompt(healthProfile);
-      anthropicMessages = recentMessages.reverse().map((m) => ({
-        role: m.role === 'USER' ? ('user' as const) : ('assistant' as const),
-        content: m.content,
+      geminiContents = recentMessages.reverse().map((m) => ({
+        role: m.role === 'USER' ? ('user' as const) : ('model' as const),
+        parts: [{ text: m.content }],
       }));
     } catch (err) {
       next(err);
@@ -98,24 +98,24 @@ aiChatRouter.post(
     res.setHeader('Cache-Control', 'no-cache, no-transform');
     res.setHeader('Connection', 'keep-alive');
 
-    const stream = claudeClient.messages.stream({
-      model: CLAUDE_MODEL,
-      max_tokens: 2048,
-      system: systemPrompt,
-      messages: anthropicMessages,
-      output_config: { effort: 'medium' },
-    });
-
-    stream.on('text', (delta) => {
-      res.write(`data: ${JSON.stringify({ delta })}\n\n`);
-    });
-
     try {
-      const finalMessage = await stream.finalMessage();
-      const textContent = finalMessage.content
-        .filter((block) => block.type === 'text')
-        .map((block) => (block.type === 'text' ? block.text : ''))
-        .join('');
+      const stream = await geminiClient.models.generateContentStream({
+        model: GEMINI_MODEL,
+        contents: geminiContents,
+        config: {
+          systemInstruction: systemPrompt,
+          maxOutputTokens: 2048,
+        },
+      });
+
+      let textContent = '';
+      for await (const chunk of stream) {
+        const delta = chunk.text;
+        if (delta) {
+          textContent += delta;
+          res.write(`data: ${JSON.stringify({ delta })}\n\n`);
+        }
+      }
 
       await prisma.aiChatMessage.create({
         data: { conversationId, role: 'ASSISTANT', content: textContent },

@@ -1,17 +1,17 @@
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../src/lib/claude', async () => {
-  const actual = await vi.importActual<typeof import('../src/lib/claude')>('../src/lib/claude');
+vi.mock('../src/lib/gemini', async () => {
+  const actual = await vi.importActual<typeof import('../src/lib/gemini')>('../src/lib/gemini');
   return {
     ...actual,
-    getClaudeClient: vi.fn(),
+    getGeminiClient: vi.fn(),
   };
 });
 
 import { app } from '../src/app';
 import { AppError } from '../src/errors/AppError';
-import { getClaudeClient } from '../src/lib/claude';
+import { getGeminiClient } from '../src/lib/gemini';
 import { prisma } from '../src/lib/prisma';
 
 async function registerAndGetToken(email: string): Promise<string> {
@@ -21,10 +21,10 @@ async function registerAndGetToken(email: string): Promise<string> {
   return res.body.accessToken as string;
 }
 
-function mockParseClient(parsedOutput: unknown) {
+function mockGenerateContentClient(parsedOutput: unknown) {
   return {
-    messages: {
-      parse: vi.fn().mockResolvedValue({ parsed_output: parsedOutput }),
+    models: {
+      generateContent: vi.fn().mockResolvedValue({ text: JSON.stringify(parsedOutput) }),
     },
   };
 }
@@ -41,7 +41,7 @@ const sampleWeek = {
 };
 
 beforeEach(async () => {
-  vi.mocked(getClaudeClient).mockReset();
+  vi.mocked(getGeminiClient).mockReset();
   await prisma.aiWeightLossPlanWeek.deleteMany();
   await prisma.aiWeightLossPlan.deleteMany();
   await prisma.user.deleteMany();
@@ -69,10 +69,10 @@ describe('AI weight-loss coach', () => {
     expect(res.status).toBe(400);
   });
 
-  it('generates and persists a plan from the parsed Claude output', async () => {
+  it('generates and persists a plan from the parsed Gemini output', async () => {
     const token = await registerAndGetToken('aiwlp-generate@example.com');
-    vi.mocked(getClaudeClient).mockReturnValue(
-      mockParseClient({ summary: 'A gradual plan.', weeks: [sampleWeek] }) as never,
+    vi.mocked(getGeminiClient).mockReturnValue(
+      mockGenerateContentClient({ summary: 'A gradual plan.', weeks: [sampleWeek] }) as never,
     );
 
     const res = await request(app)
@@ -91,11 +91,24 @@ describe('AI weight-loss coach', () => {
     expect(listRes.body.plans).toHaveLength(1);
   });
 
+  it('returns a 502 when Gemini returns output that fails schema validation', async () => {
+    const token = await registerAndGetToken('aiwlp-badoutput@example.com');
+    vi.mocked(getGeminiClient).mockReturnValue(
+      mockGenerateContentClient({ summary: 'Missing weeks field' }) as never,
+    );
+
+    const res = await request(app)
+      .post('/api/ai/weight-loss-plans/generate')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ targetWeightKg: 70, durationWeeks: 8 });
+    expect(res.status).toBe(502);
+  });
+
   it('scopes get/delete to the owning user', async () => {
     const token = await registerAndGetToken('aiwlp-owner@example.com');
     const otherToken = await registerAndGetToken('aiwlp-other@example.com');
-    vi.mocked(getClaudeClient).mockReturnValue(
-      mockParseClient({ summary: 'Plan', weeks: [sampleWeek] }) as never,
+    vi.mocked(getGeminiClient).mockReturnValue(
+      mockGenerateContentClient({ summary: 'Plan', weeks: [sampleWeek] }) as never,
     );
 
     const createRes = await request(app)
@@ -122,7 +135,7 @@ describe('AI weight-loss coach', () => {
 
   it('returns a 503 when the API key is not configured, with no orphaned plan', async () => {
     const token = await registerAndGetToken('aiwlp-nokey@example.com');
-    vi.mocked(getClaudeClient).mockImplementation(() => {
+    vi.mocked(getGeminiClient).mockImplementation(() => {
       throw new AppError(503, 'not configured');
     });
 

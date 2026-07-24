@@ -1,14 +1,15 @@
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { AppError } from '../errors/AppError';
-import { CLAUDE_MODEL, getClaudeClient } from '../lib/claude';
+import { GEMINI_MODEL, getGeminiClient } from '../lib/gemini';
 import { prisma } from '../lib/prisma';
 import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import {
   generateWeightLossPlanSchema,
+  weightLossPlanGeminiSchema,
   weightLossPlanOutputSchema,
+  type WeightLossPlanOutput,
 } from '../schemas/aiWeightLossPlan.schema';
 
 export const aiWeightLossPlanRouter = Router();
@@ -82,7 +83,7 @@ aiWeightLossPlanRouter.post(
   async (req, res, next) => {
     try {
       const userId = req.userId!;
-      const claudeClient = getClaudeClient();
+      const geminiClient = await getGeminiClient();
       const { targetWeightKg, durationWeeks } = req.body as ReturnType<
         typeof generateWeightLossPlanSchema.parse
       >;
@@ -90,25 +91,27 @@ aiWeightLossPlanRouter.post(
       const healthProfile = await prisma.healthProfile.findUnique({ where: { userId } });
       const userPrompt = buildWeightLossUserPrompt(targetWeightKg, durationWeeks, healthProfile);
 
-      const response = await claudeClient.messages.parse({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        thinking: { type: 'adaptive' },
-        output_config: {
-          effort: 'high',
-          format: zodOutputFormat(weightLossPlanOutputSchema),
+      const response = await geminiClient.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+        config: {
+          maxOutputTokens: 4096,
+          responseMimeType: 'application/json',
+          responseSchema: weightLossPlanGeminiSchema,
         },
-        messages: [{ role: 'user', content: userPrompt }],
       });
 
-      if (!response.parsed_output) {
+      let summary: WeightLossPlanOutput['summary'];
+      let weeks: WeightLossPlanOutput['weeks'];
+      try {
+        if (!response.text) throw new Error('empty response');
+        ({ summary, weeks } = weightLossPlanOutputSchema.parse(JSON.parse(response.text)));
+      } catch {
         throw new AppError(
           502,
           'The AI assistant returned an unexpected response. Please try again.',
         );
       }
-
-      const { summary, weeks } = response.parsed_output;
 
       const plan = await prisma.aiWeightLossPlan.create({
         data: {

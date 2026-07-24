@@ -1,17 +1,53 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { AppError } from '../errors/AppError';
 
-export const CLAUDE_MODEL = 'claude-opus-4-8';
+export const GEMINI_MODEL = 'gemini-2.5-flash';
 
-let client: Anthropic | null = null;
+// @google/genai is ESM-only while this package is CommonJS, so even a
+// type-only static import trips TypeScript's Node16 CJS/ESM interop rules.
+// The client is loaded via dynamic import() (which works from CJS) and
+// described here by a minimal local interface covering only what this app
+// calls, rather than importing the SDK's own types.
+interface GeminiContentPart {
+  text: string;
+}
+interface GeminiContent {
+  role: 'user' | 'model';
+  parts: GeminiContentPart[];
+}
+interface GeminiGenerateContentParams {
+  model: string;
+  contents: GeminiContent[];
+  config?: {
+    systemInstruction?: string;
+    maxOutputTokens?: number;
+    responseMimeType?: string;
+    responseSchema?: unknown;
+  };
+}
+interface GeminiGenerateContentResponse {
+  text?: string;
+}
+export interface GeminiClient {
+  models: {
+    generateContent: (
+      params: GeminiGenerateContentParams,
+    ) => Promise<GeminiGenerateContentResponse>;
+    generateContentStream: (
+      params: GeminiGenerateContentParams,
+    ) => Promise<AsyncIterable<GeminiGenerateContentResponse>>;
+  };
+}
 
-export function getClaudeClient(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+let client: GeminiClient | null = null;
+
+export async function getGeminiClient(): Promise<GeminiClient> {
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new AppError(503, 'AI features are not configured (missing ANTHROPIC_API_KEY)');
+    throw new AppError(503, 'AI features are not configured (missing GEMINI_API_KEY)');
   }
   if (!client) {
-    client = new Anthropic({ apiKey });
+    const { GoogleGenAI } = await import('@google/genai');
+    client = new GoogleGenAI({ apiKey }) as unknown as GeminiClient;
   }
   return client;
 }

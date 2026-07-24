@@ -1,17 +1,17 @@
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../src/lib/claude', async () => {
-  const actual = await vi.importActual<typeof import('../src/lib/claude')>('../src/lib/claude');
+vi.mock('../src/lib/gemini', async () => {
+  const actual = await vi.importActual<typeof import('../src/lib/gemini')>('../src/lib/gemini');
   return {
     ...actual,
-    getClaudeClient: vi.fn(),
+    getGeminiClient: vi.fn(),
   };
 });
 
 import { app } from '../src/app';
 import { AppError } from '../src/errors/AppError';
-import { getClaudeClient } from '../src/lib/claude';
+import { getGeminiClient } from '../src/lib/gemini';
 import { prisma } from '../src/lib/prisma';
 
 async function registerAndGetToken(email: string): Promise<string> {
@@ -21,29 +21,20 @@ async function registerAndGetToken(email: string): Promise<string> {
   return res.body.accessToken as string;
 }
 
-function mockStreamingClient(deltas: string[], finalText: string) {
-  const listeners: Record<string, Array<(delta: string) => void>> = {};
-  const stream = {
-    on(event: string, cb: (delta: string) => void) {
-      (listeners[event] ??= []).push(cb);
-      return stream;
-    },
-    async finalMessage() {
-      for (const delta of deltas) {
-        listeners.text?.forEach((cb) => cb(delta));
-      }
-      return { content: [{ type: 'text', text: finalText }] };
-    },
-  };
+function mockStreamingClient(deltas: string[]) {
   return {
-    messages: {
-      stream: vi.fn(() => stream),
+    models: {
+      generateContentStream: vi.fn(async function* () {
+        for (const delta of deltas) {
+          yield { text: delta };
+        }
+      }),
     },
   };
 }
 
 beforeEach(async () => {
-  vi.mocked(getClaudeClient).mockReset();
+  vi.mocked(getGeminiClient).mockReset();
   await prisma.aiChatMessage.deleteMany();
   await prisma.aiConversation.deleteMany();
   await prisma.user.deleteMany();
@@ -80,9 +71,7 @@ describe('AI nutritionist chat', () => {
 
   it('streams a reply and persists both messages', async () => {
     const token = await registerAndGetToken('aichat-stream@example.com');
-    vi.mocked(getClaudeClient).mockReturnValue(
-      mockStreamingClient(['Hello', ' there'], 'Hello there') as never,
-    );
+    vi.mocked(getGeminiClient).mockReturnValue(mockStreamingClient(['Hello', ' there']) as never);
 
     const res = await request(app)
       .post('/api/ai/chat/messages')
@@ -105,7 +94,7 @@ describe('AI nutritionist chat', () => {
 
   it('deletes the conversation', async () => {
     const token = await registerAndGetToken('aichat-delete@example.com');
-    vi.mocked(getClaudeClient).mockReturnValue(mockStreamingClient(['Hi'], 'Hi') as never);
+    vi.mocked(getGeminiClient).mockReturnValue(mockStreamingClient(['Hi']) as never);
     await request(app)
       .post('/api/ai/chat/messages')
       .set('Authorization', `Bearer ${token}`)
@@ -124,7 +113,7 @@ describe('AI nutritionist chat', () => {
 
   it('returns a 503 when the API key is not configured, with no orphaned message', async () => {
     const token = await registerAndGetToken('aichat-nokey@example.com');
-    vi.mocked(getClaudeClient).mockImplementation(() => {
+    vi.mocked(getGeminiClient).mockImplementation(() => {
       throw new AppError(503, 'not configured');
     });
 
