@@ -61,8 +61,8 @@ function formatTime(iso: string): string {
 }
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
-const labelClass = 'block text-sm font-medium text-slate-300';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
+const labelClass = 'block text-sm font-medium text-slate-600';
 
 export default function SleepPage() {
   const queryClient = useQueryClient();
@@ -132,12 +132,12 @@ export default function SleepPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
         <div className="flex items-baseline justify-between">
           <h1 className="text-2xl font-bold">Sleep tools</h1>
           {goalHours != null && (
-            <span className="text-sm text-slate-300">
-              Goal: <span className="font-semibold text-sky-300">{goalHours}h</span>
+            <span className="text-sm text-slate-600">
+              Goal: <span className="font-semibold text-teal-600">{goalHours}h</span>
               <span className="text-slate-500"> (edit on Profile page)</span>
             </span>
           )}
@@ -201,12 +201,12 @@ export default function SleepPage() {
             <input id="notes" type="text" className={inputClass} {...register('notes')} />
           </div>
 
-          {serverError && <p className="col-span-2 text-sm text-rose-400">{serverError}</p>}
+          {serverError && <p className="col-span-2 text-sm text-rose-600">{serverError}</p>}
 
           <button
             type="submit"
             disabled={createMutation.isPending}
-            className="col-span-2 rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+            className="col-span-2 rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
           >
             {createMutation.isPending ? 'Saving...' : 'Log sleep'}
           </button>
@@ -214,8 +214,8 @@ export default function SleepPage() {
       </section>
 
       {chartData.length > 1 && (
-        <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
-          <h2 className="text-lg font-semibold text-slate-200">Sleep duration over time</h2>
+        <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
+          <h2 className="text-lg font-semibold text-slate-700">Sleep duration over time</h2>
           <div className="mt-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
@@ -224,9 +224,10 @@ export default function SleepPage() {
                 <YAxis stroke="#94a3b8" fontSize={12} domain={[0, 'auto']} />
                 <Tooltip
                   contentStyle={{
-                    background: '#0f172a',
-                    border: '1px solid rgba(148,163,184,0.2)',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
                     borderRadius: 8,
+                    boxShadow: '0 4px 12px rgba(15,23,42,0.08)',
                   }}
                   formatter={(value) => [`${value}h`, 'Sleep']}
                 />
@@ -238,23 +239,23 @@ export default function SleepPage() {
                     label={{ value: 'Goal', position: 'right', fill: '#34d399', fontSize: 12 }}
                   />
                 )}
-                <Bar dataKey="hours" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="hours" fill="#0d9488" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </section>
       )}
 
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
-        <h2 className="text-lg font-semibold text-slate-200">Recent entries</h2>
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
+        <h2 className="text-lg font-semibold text-slate-700">Recent entries</h2>
         {entriesQuery.isLoading ? (
-          <p className="mt-4 text-slate-300">Loading...</p>
+          <p className="mt-4 text-slate-600">Loading...</p>
         ) : sortedEntries.length === 0 ? (
-          <p className="mt-4 text-slate-300">No sleep logged yet.</p>
+          <p className="mt-4 text-slate-600">No sleep logged yet.</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-slate-400">
+              <thead className="text-slate-500">
                 <tr>
                   <th className="pb-2 pr-4">Date</th>
                   <th className="pb-2 pr-4">Bedtime</th>
@@ -264,9 +265,9 @@ export default function SleepPage() {
                   <th className="pb-2"></th>
                 </tr>
               </thead>
-              <tbody className="text-slate-200">
+              <tbody className="text-slate-700">
                 {sortedEntries.map((entry) => (
-                  <tr key={entry.id} className="border-t border-white/5">
+                  <tr key={entry.id} className="border-t border-slate-100">
                     <td className="py-2 pr-4">{entry.recordedAt.slice(0, 10)}</td>
                     <td className="py-2 pr-4">{formatTime(entry.bedtime)}</td>
                     <td className="py-2 pr-4">{formatTime(entry.wakeTime)}</td>
@@ -276,7 +277,7 @@ export default function SleepPage() {
                       <button
                         type="button"
                         onClick={() => deleteMutation.mutate(entry.id)}
-                        className="text-rose-400 transition-colors hover:text-rose-300"
+                        className="text-rose-600 transition-colors hover:text-rose-500"
                       >
                         Delete
                       </button>
