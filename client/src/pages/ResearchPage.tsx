@@ -6,7 +6,7 @@ import { getErrorMessage } from '../lib/errorMessage';
 import type { ResearchSummary } from '../types/research';
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
 
 export default function ResearchPage() {
   const [inputValue, setInputValue] = useState('');
@@ -34,7 +34,7 @@ export default function ResearchPage() {
     <div className="space-y-8">
       <Card>
         <h1 className="text-2xl font-bold">Research summaries</h1>
-        <p className="mt-2 text-slate-300">
+        <p className="mt-2 text-slate-600">
           Search PubMed for published research abstracts on health and fitness topics.
         </p>
 
@@ -52,31 +52,31 @@ export default function ResearchPage() {
         </form>
 
         {searchQuery.isError && (
-          <p className="mt-4 text-sm text-rose-400">
+          <p className="mt-4 text-sm text-rose-600">
             {getErrorMessage(searchQuery.error, 'Unable to search research')}
           </p>
         )}
       </Card>
 
       {searchQuery.isLoading ? (
-        <p className="text-slate-300">Searching...</p>
+        <p className="text-slate-600">Searching...</p>
       ) : searchTerm && results.length === 0 ? (
-        <p className="text-slate-300">No research found.</p>
+        <p className="text-slate-600">No research found.</p>
       ) : (
         <div className="space-y-4">
           {results.map((result) => (
             <Card key={result.pmid}>
-              <h2 className="font-medium text-slate-100">{result.title}</h2>
-              <p className="mt-1 text-xs text-slate-400">
+              <h2 className="font-medium text-slate-900">{result.title}</h2>
+              <p className="mt-1 text-xs text-slate-500">
                 {[result.journal, result.year].filter(Boolean).join(' · ')}
                 {result.authors.length > 0 && ` · ${result.authors.join(', ')}`}
               </p>
-              <p className="mt-3 text-sm text-slate-300">{result.abstract}</p>
+              <p className="mt-3 text-sm text-slate-600">{result.abstract}</p>
               <a
                 href={result.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 inline-block text-sm text-sky-300 hover:text-sky-200"
+                className="mt-3 inline-block text-sm text-teal-600 hover:text-teal-700"
               >
                 View on PubMed
               </a>
