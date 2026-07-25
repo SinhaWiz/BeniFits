@@ -5,13 +5,13 @@ import { getErrorMessage } from '../lib/errorMessage';
 import type { NutritionSummary } from '../types/nutrition';
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
 
 function MacroStat({ label, value, unit }: { label: string; value: number | null; unit: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-slate-950/40 p-4 text-center">
-      <p className="text-xs tracking-wide text-slate-400 uppercase">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-slate-100">
+    <div className="rounded-xl border border-slate-200/70 bg-slate-50 p-4 text-center">
+      <p className="text-xs tracking-wide text-slate-500 uppercase">{label}</p>
+      <p className="mt-1 text-xl font-semibold text-slate-900">
         {value != null ? `${value}${unit}` : '—'}
       </p>
     </div>
@@ -53,9 +53,9 @@ export default function NutritionPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
         <h1 className="text-2xl font-bold">Nutrition calculator</h1>
-        <p className="mt-2 text-slate-300">
+        <p className="mt-2 text-slate-600">
           Search USDA FoodData Central for calories and macros per food item.
         </p>
 
@@ -70,25 +70,25 @@ export default function NutritionPage() {
           <button
             type="submit"
             disabled={!inputValue.trim()}
-            className="shrink-0 rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+            className="shrink-0 rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
           >
             Search
           </button>
         </form>
 
         {searchQuery.isError && (
-          <p className="mt-4 text-sm text-rose-400">
+          <p className="mt-4 text-sm text-rose-600">
             {getErrorMessage(searchQuery.error, 'Unable to search foods')}
           </p>
         )}
       </section>
 
       <div className="grid gap-8 md:grid-cols-2">
-        <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
-          <h2 className="text-lg font-semibold text-slate-200">Results</h2>
-          {searchQuery.isLoading && <p className="mt-4 text-slate-300">Searching...</p>}
+        <section className="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-slate-200/60">
+          <h2 className="text-lg font-semibold text-slate-700">Results</h2>
+          {searchQuery.isLoading && <p className="mt-4 text-slate-600">Searching...</p>}
           {!searchQuery.isLoading && searchTerm && (searchQuery.data ?? []).length === 0 && (
-            <p className="mt-4 text-slate-300">No results.</p>
+            <p className="mt-4 text-slate-600">No results.</p>
           )}
           <ul className="mt-4 space-y-2">
             {(searchQuery.data ?? []).map((food) => (
@@ -98,26 +98,26 @@ export default function NutritionPage() {
                   onClick={() => setSelectedFdcId(food.fdcId)}
                   className={`w-full rounded-lg border px-4 py-2 text-left text-sm transition-colors ${
                     selectedFdcId === food.fdcId
-                      ? 'border-sky-400 bg-sky-500/10 text-sky-300'
-                      : 'border-white/10 bg-slate-950/40 text-slate-200 hover:border-white/20'
+                      ? 'border-teal-500 bg-teal-50 text-teal-600'
+                      : 'border-slate-200/70 bg-slate-50 text-slate-700 hover:border-slate-300'
                   }`}
                 >
                   <span className="font-medium">{food.description}</span>
-                  <span className="ml-2 text-xs text-slate-400">{food.dataType}</span>
+                  <span className="ml-2 text-xs text-slate-500">{food.dataType}</span>
                 </button>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
-          <h2 className="text-lg font-semibold text-slate-200">Nutrition facts</h2>
-          {!selectedFdcId && <p className="mt-4 text-slate-300">Select a food to see details.</p>}
-          {detailQuery.isLoading && <p className="mt-4 text-slate-300">Loading...</p>}
+        <section className="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-slate-200/60">
+          <h2 className="text-lg font-semibold text-slate-700">Nutrition facts</h2>
+          {!selectedFdcId && <p className="mt-4 text-slate-600">Select a food to see details.</p>}
+          {detailQuery.isLoading && <p className="mt-4 text-slate-600">Loading...</p>}
           {detailQuery.data && (
             <div className="mt-4">
-              <p className="font-medium text-slate-100">{detailQuery.data.description}</p>
-              <p className="text-xs text-slate-400">{detailQuery.data.dataType}</p>
+              <p className="font-medium text-slate-900">{detailQuery.data.description}</p>
+              <p className="text-xs text-slate-500">{detailQuery.data.dataType}</p>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <MacroStat label="Calories" value={detailQuery.data.calories} unit=" kcal" />
                 <MacroStat label="Protein" value={detailQuery.data.proteinG} unit="g" />
