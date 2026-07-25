@@ -69,25 +69,25 @@ export default function ChallengesPage() {
     <div className="space-y-8">
       <Card>
         <h1 className="text-2xl font-bold">Challenges</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-slate-500">
           Join a challenge and see how you stack up on the leaderboard.
         </p>
-        {error && <p className="mt-4 text-sm text-rose-400">{error}</p>}
+        {error && <p className="mt-4 text-sm text-rose-600">{error}</p>}
       </Card>
 
       {challengesQuery.isLoading ? (
-        <p className="text-slate-300">Loading...</p>
+        <p className="text-slate-600">Loading...</p>
       ) : challenges.length === 0 ? (
-        <p className="text-slate-300">No challenges available right now.</p>
+        <p className="text-slate-600">No challenges available right now.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {challenges.map((challenge) => (
             <Card key={challenge.id}>
               <div className="flex items-start justify-between gap-2">
-                <h2 className="font-semibold text-slate-100">{challenge.title}</h2>
+                <h2 className="font-semibold text-slate-900">{challenge.title}</h2>
                 <Badge>{metricLabel(challenge.metric)}</Badge>
               </div>
-              <p className="mt-2 text-sm text-slate-400">{challenge.description}</p>
+              <p className="mt-2 text-sm text-slate-500">{challenge.description}</p>
               <p className="mt-2 text-xs text-slate-500">
                 {formatDate(challenge.startsAt)} &ndash; {formatDate(challenge.endsAt)} &middot;{' '}
                 {challenge.participantCount} joined
@@ -111,7 +111,7 @@ export default function ChallengesPage() {
                 )}
                 <Link
                   to={`/challenges/${challenge.id}`}
-                  className="text-sm font-medium text-sky-400 hover:text-sky-300"
+                  className="text-sm font-medium text-teal-600 hover:text-teal-600"
                 >
                   View leaderboard
                 </Link>
