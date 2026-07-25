@@ -16,8 +16,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Sentry.ErrorBoundary
       fallback={
-        <div className="mx-auto max-w-md py-24 text-center text-slate-300">
-          <h1 className="text-xl font-semibold text-slate-100">Something went wrong</h1>
+        <div className="mx-auto max-w-md py-24 text-center text-slate-600">
+          <h1 className="text-xl font-semibold text-slate-900">Something went wrong</h1>
           <p className="mt-2 text-sm">Please refresh the page and try again.</p>
         </div>
       }
