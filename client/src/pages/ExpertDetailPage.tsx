@@ -65,12 +65,12 @@ export default function ExpertDetailPage() {
   };
 
   if (expertQuery.isLoading) {
-    return <p className="text-slate-300">Loading...</p>;
+    return <p className="text-slate-600">Loading...</p>;
   }
 
   if (expertQuery.isError || !expertQuery.data) {
     return (
-      <p className="text-sm text-rose-400">
+      <p className="text-sm text-rose-600">
         {getErrorMessage(expertQuery.error, 'Unable to load this expert')}
       </p>
     );
@@ -84,43 +84,43 @@ export default function ExpertDetailPage() {
         <div className="flex items-start justify-between gap-2">
           <div>
             <h1 className="text-2xl font-bold">{expert.user.name ?? 'Expert'}</h1>
-            <p className="mt-1 text-sm font-medium text-sky-300">{expert.specialty}</p>
+            <p className="mt-1 text-sm font-medium text-teal-600">{expert.specialty}</p>
           </div>
           <Badge>{expert.user.role}</Badge>
         </div>
-        <p className="mt-4 text-slate-300">{expert.bio}</p>
+        <p className="mt-4 text-slate-600">{expert.bio}</p>
         <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-slate-400">Focus area</dt>
-            <dd className="text-slate-200">{expert.focusArea}</dd>
+            <dt className="text-slate-500">Focus area</dt>
+            <dd className="text-slate-700">{expert.focusArea}</dd>
           </div>
           {expert.credentials && (
             <div>
-              <dt className="text-slate-400">Credentials</dt>
-              <dd className="text-slate-200">{expert.credentials}</dd>
+              <dt className="text-slate-500">Credentials</dt>
+              <dd className="text-slate-700">{expert.credentials}</dd>
             </div>
           )}
           {expert.yearsExperience != null && (
             <div>
-              <dt className="text-slate-400">Experience</dt>
-              <dd className="text-slate-200">{expert.yearsExperience} years</dd>
+              <dt className="text-slate-500">Experience</dt>
+              <dd className="text-slate-700">{expert.yearsExperience} years</dd>
             </div>
           )}
         </dl>
       </Card>
 
       <Card>
-        <h2 className="text-lg font-semibold text-slate-200">Upcoming availability</h2>
+        <h2 className="text-lg font-semibold text-slate-700">Upcoming availability</h2>
         {!expert.isAcceptingBookings ? (
-          <p className="mt-2 text-sm text-rose-400">This expert is not accepting bookings.</p>
+          <p className="mt-2 text-sm text-rose-600">This expert is not accepting bookings.</p>
         ) : expert.availabilitySlots.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-300">No open slots right now.</p>
+          <p className="mt-2 text-sm text-slate-600">No open slots right now.</p>
         ) : (
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
             {expert.availabilitySlots.map((slot) => (
               <li
                 key={slot.id}
-                className="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-slate-950/40 p-4 text-sm text-slate-200"
+                className="flex items-center justify-between gap-2 rounded-xl border border-slate-200/70 bg-slate-50 p-4 text-sm text-slate-700"
               >
                 {formatSlotTime(slot.startsAt, slot.endsAt)}
                 <Button
@@ -139,21 +139,21 @@ export default function ExpertDetailPage() {
 
       {selectedSlot && (
         <Modal title="Confirm booking" onClose={closeModal}>
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-slate-600">
             {formatSlotTime(selectedSlot.startsAt, selectedSlot.endsAt)} with{' '}
             {expert.user.name ?? 'this expert'}
           </p>
-          <label htmlFor="notes" className="mt-4 block text-sm font-medium text-slate-300">
+          <label htmlFor="notes" className="mt-4 block text-sm font-medium text-slate-600">
             Notes (optional)
           </label>
           <textarea
             id="notes"
             rows={3}
-            className="mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none"
+            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
-          {bookingError && <p className="mt-2 text-sm text-rose-400">{bookingError}</p>}
+          {bookingError && <p className="mt-2 text-sm text-rose-600">{bookingError}</p>}
           <div className="mt-4 flex justify-end gap-3">
             <Button type="button" variant="secondary" onClick={closeModal}>
               Cancel
