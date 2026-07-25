@@ -9,7 +9,7 @@ import { useSocket } from '../realtime/SocketContext';
 import type { Message } from '../types/message';
 
 const inputClass =
-  'flex-1 rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
+  'flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
 
 export default function ConversationPage() {
   const { id } = useParams<{ id: string }>();
@@ -71,12 +71,12 @@ export default function ConversationPage() {
   };
 
   if (historyQuery.isLoading) {
-    return <p className="text-slate-300">Loading...</p>;
+    return <p className="text-slate-600">Loading...</p>;
   }
 
   if (historyQuery.isError) {
     return (
-      <p className="text-sm text-rose-400">
+      <p className="text-sm text-rose-600">
         {getErrorMessage(historyQuery.error, 'Unable to load this conversation')}
       </p>
     );
@@ -88,7 +88,7 @@ export default function ConversationPage() {
       <Card className="flex h-[28rem] flex-col">
         <div className="flex-1 space-y-2 overflow-y-auto pr-2">
           {messages.length === 0 ? (
-            <p className="text-sm text-slate-400">No messages yet. Say hello!</p>
+            <p className="text-sm text-slate-500">No messages yet. Say hello!</p>
           ) : (
             messages.map((message) => {
               const isOwn = message.senderId === user?.id;
@@ -96,7 +96,7 @@ export default function ConversationPage() {
                 <div
                   key={message.id}
                   className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
-                    isOwn ? 'ml-auto bg-sky-500 text-slate-950' : 'bg-slate-800 text-slate-100'
+                    isOwn ? 'ml-auto bg-teal-600 text-white' : 'bg-slate-100 text-slate-900'
                   }`}
                 >
                   {message.content}
@@ -106,7 +106,7 @@ export default function ConversationPage() {
           )}
           <div ref={bottomRef} />
         </div>
-        {socketError && <p className="mt-2 text-sm text-rose-400">{socketError}</p>}
+        {socketError && <p className="mt-2 text-sm text-rose-600">{socketError}</p>}
         <form onSubmit={handleSend} className="mt-4 flex gap-2">
           <input
             type="text"
@@ -118,7 +118,7 @@ export default function ConversationPage() {
           <button
             type="submit"
             disabled={!socket || !draft.trim()}
-            className="rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+            className="rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
           >
             Send
           </button>
