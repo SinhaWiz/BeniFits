@@ -89,8 +89,8 @@ function formValuesToPayload(values: DietPlanFormValues): DietPlanInput {
 }
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
-const labelClass = 'block text-sm font-medium text-slate-300';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
+const labelClass = 'block text-sm font-medium text-slate-600';
 
 export default function DietPlannerPage() {
   const queryClient = useQueryClient();
@@ -183,7 +183,7 @@ export default function DietPlannerPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">
             {editingPlanId ? 'Edit diet plan' : 'New diet plan'}
@@ -192,7 +192,7 @@ export default function DietPlannerPage() {
             <button
               type="button"
               onClick={startNewPlan}
-              className="text-sm text-slate-300 hover:text-white"
+              className="text-sm text-slate-600 hover:text-white"
             >
               Start a new plan instead
             </button>
@@ -262,7 +262,7 @@ export default function DietPlannerPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+          <div className="rounded-2xl border border-slate-200/70 bg-slate-50 p-4">
             <p className={labelClass}>Add a meal from a nutrition search</p>
             <div className="mt-2 flex gap-2">
               <input
@@ -276,7 +276,7 @@ export default function DietPlannerPage() {
                 type="button"
                 onClick={() => setFoodSearchTerm(foodQuery.trim())}
                 disabled={!foodQuery.trim()}
-                className="mt-1 shrink-0 rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700 disabled:opacity-60"
+                className="mt-1 shrink-0 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-60"
               >
                 Search
               </button>
@@ -288,10 +288,10 @@ export default function DietPlannerPage() {
                     <button
                       type="button"
                       onClick={() => addFoodAsMeal(food)}
-                      className="w-full rounded-lg border border-white/10 px-3 py-1.5 text-left text-sm text-slate-200 hover:border-white/20"
+                      className="w-full rounded-lg border border-slate-200/70 px-3 py-1.5 text-left text-sm text-slate-700 hover:border-slate-300"
                     >
                       {food.description}{' '}
-                      <span className="text-xs text-slate-400">({food.calories ?? '—'} kcal)</span>
+                      <span className="text-xs text-slate-500">({food.calories ?? '—'} kcal)</span>
                     </button>
                   </li>
                 ))}
@@ -305,23 +305,23 @@ export default function DietPlannerPage() {
               <button
                 type="button"
                 onClick={() => append(emptyMeal)}
-                className="text-sm text-sky-300 hover:text-sky-200"
+                className="text-sm text-teal-600 hover:text-teal-700"
               >
                 + Add meal manually
               </button>
             </div>
 
             {fields.length === 0 && (
-              <p className="text-sm text-slate-400">No meals yet. Add one above.</p>
+              <p className="text-sm text-slate-500">No meals yet. Add one above.</p>
             )}
 
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid grid-cols-6 items-end gap-2 rounded-xl border border-white/10 bg-slate-950/30 p-3"
+                className="grid grid-cols-6 items-end gap-2 rounded-xl border border-slate-200/70 bg-slate-50 p-3"
               >
                 <div className="col-span-1">
-                  <label className="text-xs text-slate-400">Type</label>
+                  <label className="text-xs text-slate-500">Type</label>
                   <select className={inputClass} {...register(`meals.${index}.mealType`)}>
                     {MEAL_TYPES.map((type) => (
                       <option key={type} value={type}>
@@ -331,7 +331,7 @@ export default function DietPlannerPage() {
                   </select>
                 </div>
                 <div className="col-span-2">
-                  <label className="text-xs text-slate-400">Description</label>
+                  <label className="text-xs text-slate-500">Description</label>
                   <input
                     type="text"
                     className={inputClass}
@@ -339,7 +339,7 @@ export default function DietPlannerPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400">Cal</label>
+                  <label className="text-xs text-slate-500">Cal</label>
                   <input
                     type="number"
                     min={0}
@@ -348,7 +348,7 @@ export default function DietPlannerPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400">Protein</label>
+                  <label className="text-xs text-slate-500">Protein</label>
                   <input
                     type="number"
                     min={0}
@@ -360,7 +360,7 @@ export default function DietPlannerPage() {
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    className="mb-1 text-sm text-rose-400 hover:text-rose-300"
+                    className="mb-1 text-sm text-rose-600 hover:text-rose-500"
                   >
                     Remove
                   </button>
@@ -369,34 +369,34 @@ export default function DietPlannerPage() {
             ))}
           </div>
 
-          {serverError && <p className="text-sm text-rose-400">{serverError}</p>}
+          {serverError && <p className="text-sm text-rose-600">{serverError}</p>}
 
           <button
             type="submit"
             disabled={saveMutation.isPending}
-            className="w-full rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+            className="w-full rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
           >
             {saveMutation.isPending ? 'Saving...' : editingPlanId ? 'Save changes' : 'Create plan'}
           </button>
         </form>
       </section>
 
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
-        <h2 className="text-lg font-semibold text-slate-200">Your plans</h2>
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
+        <h2 className="text-lg font-semibold text-slate-700">Your plans</h2>
         {plansQuery.isLoading ? (
-          <p className="mt-4 text-slate-300">Loading...</p>
+          <p className="mt-4 text-slate-600">Loading...</p>
         ) : (plansQuery.data ?? []).length === 0 ? (
-          <p className="mt-4 text-slate-300">No diet plans yet.</p>
+          <p className="mt-4 text-slate-600">No diet plans yet.</p>
         ) : (
           <ul className="mt-4 space-y-3">
             {(plansQuery.data ?? []).map((plan) => (
               <li
                 key={plan.id}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-950/40 p-4"
+                className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50 p-4"
               >
                 <div>
-                  <p className="font-medium text-slate-100">{plan.title}</p>
-                  <p className="text-sm text-slate-400">
+                  <p className="font-medium text-slate-900">{plan.title}</p>
+                  <p className="text-sm text-slate-500">
                     {plan.totals.calories} kcal · {plan.totals.proteinG}g protein ·{' '}
                     {plan.totals.fatG}g fat · {plan.totals.carbsG}g carbs
                     {plan.targetCalories != null && ` (target ${plan.targetCalories} kcal)`}
@@ -406,14 +406,14 @@ export default function DietPlannerPage() {
                   <button
                     type="button"
                     onClick={() => startEditing(plan)}
-                    className="text-sm text-sky-300 hover:text-sky-200"
+                    className="text-sm text-teal-600 hover:text-teal-700"
                   >
                     Edit
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteMutation.mutate(plan.id)}
-                    className="text-sm text-rose-400 hover:text-rose-300"
+                    className="text-sm text-rose-600 hover:text-rose-500"
                   >
                     Delete
                   </button>
