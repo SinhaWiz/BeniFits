@@ -24,10 +24,10 @@ function formatSlotTime(startsAt: string, endsAt: string): string {
 }
 
 const statusVariant: Record<AppointmentStatus, string> = {
-  PENDING: 'text-amber-300',
-  CONFIRMED: 'text-sky-300',
-  CANCELLED: 'text-rose-400',
-  COMPLETED: 'text-emerald-300',
+  PENDING: 'text-amber-700',
+  CONFIRMED: 'text-teal-600',
+  CANCELLED: 'text-rose-600',
+  COMPLETED: 'text-emerald-600',
 };
 
 export default function AppointmentsPage() {
@@ -90,13 +90,13 @@ export default function AppointmentsPage() {
       </div>
 
       {appointmentsQuery.isLoading ? (
-        <p className="text-slate-300">Loading...</p>
+        <p className="text-slate-600">Loading...</p>
       ) : appointmentsQuery.isError ? (
-        <p className="text-sm text-rose-400">
+        <p className="text-sm text-rose-600">
           {getErrorMessage(appointmentsQuery.error, 'Unable to load appointments')}
         </p>
       ) : appointments.length === 0 ? (
-        <p className="text-slate-300">No appointments yet.</p>
+        <p className="text-slate-600">No appointments yet.</p>
       ) : (
         <div className="space-y-4">
           {appointments.map((appointment) => {
@@ -111,12 +111,12 @@ export default function AppointmentsPage() {
               <Card key={appointment.id}>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-slate-100">{counterpart}</p>
-                    <p className="text-sm text-slate-300">
+                    <p className="font-medium text-slate-900">{counterpart}</p>
+                    <p className="text-sm text-slate-600">
                       {formatSlotTime(appointment.slot.startsAt, appointment.slot.endsAt)}
                     </p>
                     {view === 'client' && (
-                      <p className="text-xs text-sky-300">{appointment.expertProfile.specialty}</p>
+                      <p className="text-xs text-teal-600">{appointment.expertProfile.specialty}</p>
                     )}
                   </div>
                   <Badge className={statusVariant[appointment.status]}>
@@ -124,13 +124,13 @@ export default function AppointmentsPage() {
                   </Badge>
                 </div>
                 {appointment.notes && (
-                  <p className="mt-2 text-sm text-slate-400">{appointment.notes}</p>
+                  <p className="mt-2 text-sm text-slate-500">{appointment.notes}</p>
                 )}
                 {appointment.status !== 'CANCELLED' && (
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <Link
                       to={`/appointments/${appointment.id}/messages`}
-                      className="text-sm text-sky-300 hover:text-sky-200"
+                      className="text-sm text-teal-600 hover:text-teal-700"
                     >
                       Message
                     </Link>
@@ -140,7 +140,7 @@ export default function AppointmentsPage() {
                         onClick={() =>
                           statusMutation.mutate({ id: appointment.id, status: 'CONFIRMED' })
                         }
-                        className="text-sm text-sky-300 hover:text-sky-200"
+                        className="text-sm text-teal-600 hover:text-teal-700"
                       >
                         Confirm
                       </button>
@@ -151,7 +151,7 @@ export default function AppointmentsPage() {
                         onClick={() =>
                           statusMutation.mutate({ id: appointment.id, status: 'COMPLETED' })
                         }
-                        className="text-sm text-emerald-300 hover:text-emerald-200"
+                        className="text-sm text-emerald-600 hover:text-emerald-700"
                       >
                         Mark completed
                       </button>
@@ -162,7 +162,7 @@ export default function AppointmentsPage() {
                         onClick={() =>
                           statusMutation.mutate({ id: appointment.id, status: 'CANCELLED' })
                         }
-                        className="text-sm text-rose-400 hover:text-rose-300"
+                        className="text-sm text-rose-600 hover:text-rose-500"
                       >
                         Cancel
                       </button>
