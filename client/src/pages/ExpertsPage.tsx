@@ -7,8 +7,8 @@ import { getErrorMessage } from '../lib/errorMessage';
 import type { ExpertSummary } from '../types/expert';
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
-const labelClass = 'block text-sm font-medium text-slate-300';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
+const labelClass = 'block text-sm font-medium text-slate-600';
 
 export default function ExpertsPage() {
   const [specialty, setSpecialty] = useState('');
@@ -36,7 +36,7 @@ export default function ExpertsPage() {
     <div className="space-y-8">
       <Card>
         <h1 className="text-2xl font-bold">Find an expert</h1>
-        <p className="mt-2 text-slate-300">
+        <p className="mt-2 text-slate-600">
           Browse nutritionists, doctors, and coaches available for one-on-one consultations.
         </p>
 
@@ -70,7 +70,7 @@ export default function ExpertsPage() {
           <div className="flex items-end">
             <button
               type="submit"
-              className="w-full rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400"
+              className="w-full rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30"
             >
               Search
             </button>
@@ -79,33 +79,33 @@ export default function ExpertsPage() {
       </Card>
 
       {expertsQuery.isLoading ? (
-        <p className="text-slate-300">Loading...</p>
+        <p className="text-slate-600">Loading...</p>
       ) : expertsQuery.isError ? (
-        <p className="text-sm text-rose-400">
+        <p className="text-sm text-rose-600">
           {getErrorMessage(expertsQuery.error, 'Unable to load experts')}
         </p>
       ) : experts.length === 0 ? (
-        <p className="text-slate-300">No experts match your search.</p>
+        <p className="text-slate-600">No experts match your search.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {experts.map((expert) => (
             <Link key={expert.id} to={`/experts/${expert.id}`}>
-              <Card className="h-full transition-colors hover:border-white/20">
+              <Card className="h-full transition-colors hover:border-slate-300">
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="text-lg font-semibold text-slate-100">
+                  <h2 className="text-lg font-semibold text-slate-900">
                     {expert.user.name ?? 'Expert'}
                   </h2>
                   <Badge>{expert.user.role}</Badge>
                 </div>
-                <p className="mt-1 text-sm font-medium text-sky-300">{expert.specialty}</p>
-                <p className="mt-2 line-clamp-2 text-sm text-slate-300">{expert.bio}</p>
+                <p className="mt-1 text-sm font-medium text-teal-600">{expert.specialty}</p>
+                <p className="mt-2 line-clamp-2 text-sm text-slate-600">{expert.bio}</p>
                 {expert.yearsExperience != null && (
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-2 text-xs text-slate-500">
                     {expert.yearsExperience} years experience
                   </p>
                 )}
                 {!expert.isAcceptingBookings && (
-                  <p className="mt-2 text-xs text-rose-400">Not accepting bookings</p>
+                  <p className="mt-2 text-xs text-rose-600">Not accepting bookings</p>
                 )}
               </Card>
             </Link>
