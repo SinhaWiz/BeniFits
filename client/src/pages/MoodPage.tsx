@@ -61,8 +61,8 @@ function emojiForScore(score: number): string {
 }
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
-const labelClass = 'block text-sm font-medium text-slate-300';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
+const labelClass = 'block text-sm font-medium text-slate-600';
 
 export default function MoodPage() {
   const queryClient = useQueryClient();
@@ -124,7 +124,7 @@ export default function MoodPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
         <h1 className="text-2xl font-bold">Mood tracking</h1>
 
         <div className="mt-4">
@@ -156,8 +156,8 @@ export default function MoodPage() {
                   onClick={() => setValue('moodScore', option.score)}
                   className={`flex flex-1 flex-col items-center gap-1 rounded-xl border px-3 py-3 text-sm transition-colors ${
                     selectedScore === option.score
-                      ? 'border-sky-400 bg-sky-500/20 text-sky-200'
-                      : 'border-white/10 bg-slate-950/60 text-slate-300 hover:border-white/20'
+                      ? 'border-teal-500 bg-teal-50 text-teal-700'
+                      : 'border-slate-200/70 bg-slate-50 text-slate-600 hover:border-slate-300'
                   }`}
                 >
                   <span className="text-2xl" aria-hidden="true">
@@ -176,12 +176,12 @@ export default function MoodPage() {
             <input id="note" type="text" className={inputClass} {...register('note')} />
           </div>
 
-          {serverError && <p className="text-sm text-rose-400">{serverError}</p>}
+          {serverError && <p className="text-sm text-rose-600">{serverError}</p>}
 
           <button
             type="submit"
             disabled={createMutation.isPending}
-            className="rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+            className="rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
           >
             {createMutation.isPending ? 'Saving...' : 'Log mood'}
           </button>
@@ -189,8 +189,8 @@ export default function MoodPage() {
       </section>
 
       {chartData.length > 1 && (
-        <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
-          <h2 className="text-lg font-semibold text-slate-200">Mood over time</h2>
+        <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
+          <h2 className="text-lg font-semibold text-slate-700">Mood over time</h2>
           <div className="mt-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
@@ -199,29 +199,30 @@ export default function MoodPage() {
                 <YAxis stroke="#94a3b8" fontSize={12} domain={[1, 5]} allowDecimals={false} />
                 <Tooltip
                   contentStyle={{
-                    background: '#0f172a',
-                    border: '1px solid rgba(148,163,184,0.2)',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
                     borderRadius: 8,
+                    boxShadow: '0 4px 12px rgba(15,23,42,0.08)',
                   }}
                   formatter={(value) => [labelForScore(Number(value)), 'Mood']}
                 />
-                <Line type="monotone" dataKey="moodScore" stroke="#38bdf8" strokeWidth={2} />
+                <Line type="monotone" dataKey="moodScore" stroke="#0d9488" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </section>
       )}
 
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
-        <h2 className="text-lg font-semibold text-slate-200">Recent entries</h2>
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
+        <h2 className="text-lg font-semibold text-slate-700">Recent entries</h2>
         {entriesQuery.isLoading ? (
-          <p className="mt-4 text-slate-300">Loading...</p>
+          <p className="mt-4 text-slate-600">Loading...</p>
         ) : sortedEntries.length === 0 ? (
-          <p className="mt-4 text-slate-300">No moods logged yet.</p>
+          <p className="mt-4 text-slate-600">No moods logged yet.</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-slate-400">
+              <thead className="text-slate-500">
                 <tr>
                   <th className="pb-2 pr-4">Date</th>
                   <th className="pb-2 pr-4">Mood</th>
@@ -229,9 +230,9 @@ export default function MoodPage() {
                   <th className="pb-2"></th>
                 </tr>
               </thead>
-              <tbody className="text-slate-200">
+              <tbody className="text-slate-700">
                 {sortedEntries.map((entry) => (
-                  <tr key={entry.id} className="border-t border-white/5">
+                  <tr key={entry.id} className="border-t border-slate-100">
                     <td className="py-2 pr-4">{entry.recordedAt.slice(0, 10)}</td>
                     <td className="py-2 pr-4">
                       {emojiForScore(entry.moodScore)} {labelForScore(entry.moodScore)}
@@ -241,7 +242,7 @@ export default function MoodPage() {
                       <button
                         type="button"
                         onClick={() => deleteMutation.mutate(entry.id)}
-                        className="text-rose-400 transition-colors hover:text-rose-300"
+                        className="text-rose-600 transition-colors hover:text-rose-500"
                       >
                         Delete
                       </button>
