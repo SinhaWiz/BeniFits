@@ -88,8 +88,8 @@ function formValuesToPayload(values: ProfileFormValues): HealthProfileUpdate {
 }
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
-const labelClass = 'block text-sm font-medium text-slate-300';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
+const labelClass = 'block text-sm font-medium text-slate-600';
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
@@ -135,23 +135,23 @@ export default function ProfilePage() {
   };
 
   if (profileQuery.isLoading) {
-    return <p className="text-center text-slate-300">Loading your health profile...</p>;
+    return <p className="text-center text-slate-600">Loading your health profile...</p>;
   }
 
   return (
-    <section className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+    <section className="mx-auto max-w-2xl rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-bold">Health profile</h1>
         {profileQuery.data?.bmi != null && (
-          <span className="text-sm text-slate-300">
-            BMI: <span className="font-semibold text-sky-300">{profileQuery.data.bmi}</span>
+          <span className="text-sm text-slate-600">
+            BMI: <span className="font-semibold text-teal-600">{profileQuery.data.bmi}</span>
           </span>
         )}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6" noValidate>
         <fieldset className="grid grid-cols-2 gap-4">
-          <legend className="col-span-2 mb-1 text-sm font-semibold text-slate-200">
+          <legend className="col-span-2 mb-1 text-sm font-semibold text-slate-700">
             Personal information
           </legend>
           <div>
@@ -193,7 +193,7 @@ export default function ProfilePage() {
         </fieldset>
 
         <fieldset className="grid grid-cols-2 gap-4">
-          <legend className="col-span-2 mb-1 text-sm font-semibold text-slate-200">
+          <legend className="col-span-2 mb-1 text-sm font-semibold text-slate-700">
             Lifestyle &amp; goals
           </legend>
           <div>
@@ -263,7 +263,7 @@ export default function ProfilePage() {
         </fieldset>
 
         <fieldset className="space-y-4">
-          <legend className="mb-1 text-sm font-semibold text-slate-200">
+          <legend className="mb-1 text-sm font-semibold text-slate-700">
             Medical &amp; preferences
           </legend>
           <div>
@@ -291,15 +291,15 @@ export default function ProfilePage() {
           </div>
         </fieldset>
 
-        {serverError && <p className="text-sm text-rose-400">{serverError}</p>}
+        {serverError && <p className="text-sm text-rose-600">{serverError}</p>}
         {savedAt && !mutation.isPending && (
-          <p className="text-sm text-emerald-400">Profile saved.</p>
+          <p className="text-sm text-emerald-600">Profile saved.</p>
         )}
 
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="w-full rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+          className="w-full rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
         >
           {mutation.isPending ? 'Saving...' : 'Save profile'}
         </button>
