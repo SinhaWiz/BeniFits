@@ -130,26 +130,26 @@ export default function AiChatPage() {
 
   return (
     <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-3xl flex-col">
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-slate-200/60">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">AI Nutritionist</h1>
           <button
             type="button"
             onClick={() => clearMutation.mutate()}
-            className="text-sm text-slate-300 hover:text-white"
+            className="text-sm text-slate-600 hover:text-white"
           >
             Start over
           </button>
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-slate-500">
           Not medical advice. For symptoms or medical concerns, consult a healthcare professional.
         </p>
       </section>
 
-      <div className="mt-4 flex-1 space-y-4 overflow-y-auto rounded-3xl border border-white/10 bg-slate-900/40 p-6">
-        {historyQuery.isLoading && <p className="text-slate-300">Loading...</p>}
+      <div className="mt-4 flex-1 space-y-4 overflow-y-auto rounded-3xl border border-slate-200/70 bg-slate-50 p-6">
+        {historyQuery.isLoading && <p className="text-slate-600">Loading...</p>}
         {!historyQuery.isLoading && messages.length === 0 && (
-          <p className="text-slate-400">
+          <p className="text-slate-500">
             Ask me anything about nutrition, meals, or healthy eating.
           </p>
         )}
@@ -161,8 +161,8 @@ export default function AiChatPage() {
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap ${
                 message.role === 'USER'
-                  ? 'bg-sky-500 text-slate-950'
-                  : 'bg-slate-800 text-slate-100'
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-slate-100 text-slate-900'
               }`}
             >
               {message.content || (message.role === 'ASSISTANT' && isSending ? '...' : '')}
@@ -172,7 +172,7 @@ export default function AiChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      {errorText && <p className="mt-2 text-sm text-rose-400">{errorText}</p>}
+      {errorText && <p className="mt-2 text-sm text-rose-600">{errorText}</p>}
 
       <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
         <input
@@ -180,12 +180,12 @@ export default function AiChatPage() {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Ask a nutrition question..."
-          className="flex-1 rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none"
+          className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none"
         />
         <button
           type="submit"
           disabled={isSending || !draft.trim()}
-          className="rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+          className="rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
         >
           {isSending ? 'Sending...' : 'Send'}
         </button>
