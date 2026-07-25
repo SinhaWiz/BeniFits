@@ -6,7 +6,7 @@ import { getErrorMessage } from '../lib/errorMessage';
 import type { VideoResult } from '../types/video';
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
 
 export default function VideosPage() {
   const [inputValue, setInputValue] = useState('');
@@ -34,7 +34,7 @@ export default function VideosPage() {
     <div className="space-y-8">
       <Card>
         <h1 className="text-2xl font-bold">Videos</h1>
-        <p className="mt-2 text-slate-300">Search for fitness and wellness videos on YouTube.</p>
+        <p className="mt-2 text-slate-600">Search for fitness and wellness videos on YouTube.</p>
 
         <form onSubmit={onSubmit} className="mt-6 flex gap-3">
           <input
@@ -50,16 +50,16 @@ export default function VideosPage() {
         </form>
 
         {searchQuery.isError && (
-          <p className="mt-4 text-sm text-rose-400">
+          <p className="mt-4 text-sm text-rose-600">
             {getErrorMessage(searchQuery.error, 'Unable to search videos')}
           </p>
         )}
       </Card>
 
       {searchQuery.isLoading ? (
-        <p className="text-slate-300">Searching...</p>
+        <p className="text-slate-600">Searching...</p>
       ) : searchTerm && results.length === 0 ? (
-        <p className="text-slate-300">No videos found.</p>
+        <p className="text-slate-600">No videos found.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((video) => (
@@ -69,7 +69,7 @@ export default function VideosPage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Card className="h-full transition-colors hover:border-white/20">
+              <Card className="h-full transition-colors hover:border-slate-300">
                 {video.thumbnailUrl && (
                   <img
                     src={video.thumbnailUrl}
@@ -77,8 +77,8 @@ export default function VideosPage() {
                     className="mb-3 aspect-video w-full rounded-xl object-cover"
                   />
                 )}
-                <h2 className="line-clamp-2 font-medium text-slate-100">{video.title}</h2>
-                <p className="mt-1 text-xs text-slate-400">{video.channelTitle}</p>
+                <h2 className="line-clamp-2 font-medium text-slate-900">{video.title}</h2>
+                <p className="mt-1 text-xs text-slate-500">{video.channelTitle}</p>
               </Card>
             </a>
           ))}
