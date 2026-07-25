@@ -5,8 +5,8 @@ import { getErrorMessage } from '../lib/errorMessage';
 import type { AiWeightLossPlan } from '../types/aiWeightLossPlan';
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
-const labelClass = 'block text-sm font-medium text-slate-300';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
+const labelClass = 'block text-sm font-medium text-slate-600';
 
 export default function AiWeightLossCoachPage() {
   const queryClient = useQueryClient();
@@ -65,13 +65,13 @@ export default function AiWeightLossCoachPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+      <section className="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm shadow-slate-200/60">
         <h1 className="text-2xl font-bold">AI weight-loss coach</h1>
-        <p className="mt-2 text-slate-300">
+        <p className="mt-2 text-slate-600">
           Generates a week-by-week calorie, protein, workout, walking, water, and sleep plan from
           your profile and target weight.
         </p>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-slate-500">
           Not medical advice. Consult a doctor before starting any new diet or exercise program.
         </p>
 
@@ -111,22 +111,22 @@ export default function AiWeightLossCoachPage() {
           <button
             type="submit"
             disabled={generateMutation.isPending || !targetWeightKg.trim()}
-            className="col-span-2 rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+            className="col-span-2 rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
           >
             {generateMutation.isPending ? 'Generating...' : 'Generate plan'}
           </button>
         </form>
-        {errorText && <p className="mt-4 text-sm text-rose-400">{errorText}</p>}
+        {errorText && <p className="mt-4 text-sm text-rose-600">{errorText}</p>}
       </section>
 
       {plansQuery.isLoading ? (
-        <p className="text-slate-300">Loading...</p>
+        <p className="text-slate-600">Loading...</p>
       ) : plans.length === 0 ? (
-        <p className="text-slate-300">No plans yet. Generate one above.</p>
+        <p className="text-slate-600">No plans yet. Generate one above.</p>
       ) : (
         <>
-          <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
-            <h2 className="text-lg font-semibold text-slate-200">Your plans</h2>
+          <section className="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-slate-200/60">
+            <h2 className="text-lg font-semibold text-slate-700">Your plans</h2>
             <ul className="mt-4 flex flex-wrap gap-2">
               {plans.map((plan) => (
                 <li key={plan.id}>
@@ -135,8 +135,8 @@ export default function AiWeightLossCoachPage() {
                     onClick={() => setSelectedPlanId(plan.id)}
                     className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                       selectedPlan?.id === plan.id
-                        ? 'border-sky-400 bg-sky-500/10 text-sky-300'
-                        : 'border-white/10 text-slate-300 hover:border-white/20'
+                        ? 'border-teal-500 bg-teal-50 text-teal-600'
+                        : 'border-slate-200/70 text-slate-600 hover:border-slate-300'
                     }`}
                   >
                     {plan.targetWeightKg}kg in {plan.durationWeeks}w
@@ -147,51 +147,51 @@ export default function AiWeightLossCoachPage() {
           </section>
 
           {selectedPlan && (
-            <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+            <section className="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-slate-200/60">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-200">
+                <h2 className="text-lg font-semibold text-slate-700">
                   Target {selectedPlan.targetWeightKg}kg &middot; {selectedPlan.durationWeeks} weeks
                 </h2>
                 <button
                   type="button"
                   onClick={() => deleteMutation.mutate(selectedPlan.id)}
-                  className="text-sm text-rose-400 hover:text-rose-300"
+                  className="text-sm text-rose-600 hover:text-rose-500"
                 >
                   Delete plan
                 </button>
               </div>
-              <p className="mt-2 text-sm text-slate-300">{selectedPlan.summary}</p>
+              <p className="mt-2 text-sm text-slate-600">{selectedPlan.summary}</p>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {selectedPlan.weeks.map((week) => (
                   <div
                     key={week.id}
-                    className="rounded-xl border border-white/10 bg-slate-950/40 p-4 text-sm"
+                    className="rounded-xl border border-slate-200/70 bg-slate-50 p-4 text-sm"
                   >
-                    <p className="font-medium text-slate-200">Week {week.weekNumber}</p>
-                    <dl className="mt-2 space-y-1 text-slate-300">
+                    <p className="font-medium text-slate-700">Week {week.weekNumber}</p>
+                    <dl className="mt-2 space-y-1 text-slate-600">
                       <div className="flex justify-between">
-                        <dt className="text-slate-400">Calories</dt>
+                        <dt className="text-slate-500">Calories</dt>
                         <dd>{week.targetCalories} kcal</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-slate-400">Protein</dt>
+                        <dt className="text-slate-500">Protein</dt>
                         <dd>{week.targetProteinG}g</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-slate-400">Walking</dt>
+                        <dt className="text-slate-500">Walking</dt>
                         <dd>{week.walkingGoalMinutes} min/day</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-slate-400">Water</dt>
+                        <dt className="text-slate-500">Water</dt>
                         <dd>{week.waterGoalMl} ml/day</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-slate-400">Sleep</dt>
+                        <dt className="text-slate-500">Sleep</dt>
                         <dd>{week.sleepGoalHours}h</dd>
                       </div>
                     </dl>
-                    <p className="mt-2 text-slate-400">{week.workoutSummary}</p>
+                    <p className="mt-2 text-slate-500">{week.workoutSummary}</p>
                     {week.notes && <p className="mt-2 text-xs text-slate-500">{week.notes}</p>}
                   </div>
                 ))}
