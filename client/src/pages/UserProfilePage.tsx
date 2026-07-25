@@ -45,12 +45,12 @@ export default function UserProfilePage() {
   });
 
   if (profileQuery.isLoading) {
-    return <p className="text-slate-300">Loading...</p>;
+    return <p className="text-slate-600">Loading...</p>;
   }
 
   if (profileQuery.isError || !profileQuery.data) {
     return (
-      <p className="text-sm text-rose-400">
+      <p className="text-sm text-rose-600">
         {getErrorMessage(profileQuery.error, 'Unable to load this profile')}
       </p>
     );
@@ -81,24 +81,24 @@ export default function UserProfilePage() {
         </div>
         <dl className="mt-4 flex gap-6 text-sm">
           <div>
-            <dt className="text-slate-400">Posts</dt>
-            <dd className="text-slate-200">{profile.postsCount}</dd>
+            <dt className="text-slate-500">Posts</dt>
+            <dd className="text-slate-700">{profile.postsCount}</dd>
           </div>
           <div>
-            <dt className="text-slate-400">Followers</dt>
-            <dd className="text-slate-200">{profile.followersCount}</dd>
+            <dt className="text-slate-500">Followers</dt>
+            <dd className="text-slate-700">{profile.followersCount}</dd>
           </div>
           <div>
-            <dt className="text-slate-400">Following</dt>
-            <dd className="text-slate-200">{profile.followingCount}</dd>
+            <dt className="text-slate-500">Following</dt>
+            <dd className="text-slate-700">{profile.followingCount}</dd>
           </div>
         </dl>
       </Card>
 
       {postsQuery.isLoading ? (
-        <p className="text-slate-300">Loading posts...</p>
+        <p className="text-slate-600">Loading posts...</p>
       ) : posts.length === 0 ? (
-        <p className="text-slate-300">No posts yet.</p>
+        <p className="text-slate-600">No posts yet.</p>
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
