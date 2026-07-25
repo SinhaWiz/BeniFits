@@ -6,7 +6,7 @@ import { getErrorMessage } from '../lib/errorMessage';
 import type { NewsArticle } from '../types/news';
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
 
 function formatDate(publishedAt: string): string {
   return new Date(publishedAt).toLocaleDateString(undefined, {
@@ -41,7 +41,7 @@ export default function NewsPage() {
     <div className="space-y-8">
       <Card>
         <h1 className="text-2xl font-bold">Health news</h1>
-        <p className="mt-2 text-slate-300">
+        <p className="mt-2 text-slate-600">
           The latest health headlines, or search for a specific topic.
         </p>
 
@@ -72,16 +72,16 @@ export default function NewsPage() {
         </form>
 
         {newsQuery.isError && (
-          <p className="mt-4 text-sm text-rose-400">
+          <p className="mt-4 text-sm text-rose-600">
             {getErrorMessage(newsQuery.error, 'Unable to load health news')}
           </p>
         )}
       </Card>
 
       {newsQuery.isLoading ? (
-        <p className="text-slate-300">Loading...</p>
+        <p className="text-slate-600">Loading...</p>
       ) : articles.length === 0 ? (
-        <p className="text-slate-300">No articles found.</p>
+        <p className="text-slate-600">No articles found.</p>
       ) : (
         <div className="space-y-4">
           {articles.map((article) => (
@@ -100,13 +100,13 @@ export default function NewsPage() {
                   />
                 )}
                 <div>
-                  <h2 className="font-medium text-slate-100 hover:text-sky-300">
+                  <h2 className="font-medium text-slate-900 hover:text-teal-600">
                     {article.title}
                   </h2>
                   {article.description && (
-                    <p className="mt-1 text-sm text-slate-300">{article.description}</p>
+                    <p className="mt-1 text-sm text-slate-600">{article.description}</p>
                   )}
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-2 text-xs text-slate-500">
                     {article.source} · {formatDate(article.publishedAt)}
                   </p>
                 </div>
