@@ -8,7 +8,7 @@ import type { DietPlan, MealType } from '../types/dietPlan';
 import type { RecipeDetail } from '../types/recipe';
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
 const NEW_PLAN_OPTION = '__new__';
 const MEAL_TYPES: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
 
@@ -102,12 +102,12 @@ export default function RecipeDetailPage() {
   };
 
   if (recipeQuery.isLoading) {
-    return <p className="text-slate-300">Loading...</p>;
+    return <p className="text-slate-600">Loading...</p>;
   }
 
   if (recipeQuery.isError || !recipeQuery.data) {
     return (
-      <p className="text-sm text-rose-400">
+      <p className="text-sm text-rose-600">
         {getErrorMessage(recipeQuery.error, 'Unable to load this recipe')}
       </p>
     );
@@ -136,31 +136,31 @@ export default function RecipeDetailPage() {
           {recipe.readyInMinutes != null && <Badge>{recipe.readyInMinutes} min</Badge>}
           {recipe.servings != null && <Badge>{recipe.servings} servings</Badge>}
         </div>
-        {recipe.summary && <p className="mt-4 text-sm text-slate-300">{recipe.summary}</p>}
+        {recipe.summary && <p className="mt-4 text-sm text-slate-600">{recipe.summary}</p>}
         <dl className="mt-4 grid grid-cols-4 gap-3 text-center text-sm">
           <div>
-            <dt className="text-slate-400">Calories</dt>
-            <dd className="text-slate-100">{recipe.calories ?? '—'}</dd>
+            <dt className="text-slate-500">Calories</dt>
+            <dd className="text-slate-900">{recipe.calories ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-slate-400">Protein</dt>
-            <dd className="text-slate-100">{recipe.proteinG != null ? `${recipe.proteinG}g` : '—'}</dd>
+            <dt className="text-slate-500">Protein</dt>
+            <dd className="text-slate-900">{recipe.proteinG != null ? `${recipe.proteinG}g` : '—'}</dd>
           </div>
           <div>
-            <dt className="text-slate-400">Fat</dt>
-            <dd className="text-slate-100">{recipe.fatG != null ? `${recipe.fatG}g` : '—'}</dd>
+            <dt className="text-slate-500">Fat</dt>
+            <dd className="text-slate-900">{recipe.fatG != null ? `${recipe.fatG}g` : '—'}</dd>
           </div>
           <div>
-            <dt className="text-slate-400">Carbs</dt>
-            <dd className="text-slate-100">{recipe.carbsG != null ? `${recipe.carbsG}g` : '—'}</dd>
+            <dt className="text-slate-500">Carbs</dt>
+            <dd className="text-slate-900">{recipe.carbsG != null ? `${recipe.carbsG}g` : '—'}</dd>
           </div>
         </dl>
       </Card>
 
       {recipe.ingredients.length > 0 && (
         <Card>
-          <h2 className="text-lg font-semibold text-slate-200">Ingredients</h2>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-300">
+          <h2 className="text-lg font-semibold text-slate-700">Ingredients</h2>
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-600">
             {recipe.ingredients.map((ingredient, i) => (
               <li key={i}>{ingredient}</li>
             ))}
@@ -170,8 +170,8 @@ export default function RecipeDetailPage() {
 
       {recipe.instructions.length > 0 && (
         <Card>
-          <h2 className="text-lg font-semibold text-slate-200">Instructions</h2>
-          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-300">
+          <h2 className="text-lg font-semibold text-slate-700">Instructions</h2>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-600">
             {recipe.instructions.map((step, i) => (
               <li key={i}>{step}</li>
             ))}
@@ -183,7 +183,7 @@ export default function RecipeDetailPage() {
         <Modal title="Add to diet plan" onClose={closeModal}>
           {addSuccess ? (
             <div className="space-y-3">
-              <p className="text-sm text-slate-300">Added to your diet plan.</p>
+              <p className="text-sm text-slate-600">Added to your diet plan.</p>
               <Button type="button" variant="secondary" onClick={closeModal}>
                 Close
               </Button>
@@ -191,7 +191,7 @@ export default function RecipeDetailPage() {
           ) : (
             <div className="space-y-4">
               <div>
-                <label htmlFor="mealType" className="block text-sm font-medium text-slate-300">
+                <label htmlFor="mealType" className="block text-sm font-medium text-slate-600">
                   Meal type
                 </label>
                 <select
@@ -208,7 +208,7 @@ export default function RecipeDetailPage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="planId" className="block text-sm font-medium text-slate-300">
+                <label htmlFor="planId" className="block text-sm font-medium text-slate-600">
                   Diet plan
                 </label>
                 <select
@@ -227,7 +227,7 @@ export default function RecipeDetailPage() {
               </div>
               {selectedPlanId === NEW_PLAN_OPTION && (
                 <div>
-                  <label htmlFor="newPlanTitle" className="block text-sm font-medium text-slate-300">
+                  <label htmlFor="newPlanTitle" className="block text-sm font-medium text-slate-600">
                     New plan title
                   </label>
                   <input
@@ -240,7 +240,7 @@ export default function RecipeDetailPage() {
                   />
                 </div>
               )}
-              {addError && <p className="text-sm text-rose-400">{addError}</p>}
+              {addError && <p className="text-sm text-rose-600">{addError}</p>}
               <div className="flex justify-end gap-3">
                 <Button type="button" variant="secondary" onClick={closeModal}>
                   Cancel
