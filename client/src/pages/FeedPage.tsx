@@ -66,29 +66,29 @@ function CommentThread({ postId }: CommentThreadProps) {
   const comments = commentsQuery.data ?? [];
 
   return (
-    <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
+    <div className="mt-4 space-y-3 border-t border-slate-200/70 pt-4">
       {commentsQuery.isLoading ? (
-        <p className="text-sm text-slate-400">Loading comments...</p>
+        <p className="text-sm text-slate-500">Loading comments...</p>
       ) : comments.length === 0 ? (
-        <p className="text-sm text-slate-400">No comments yet.</p>
+        <p className="text-sm text-slate-500">No comments yet.</p>
       ) : (
         comments.map((comment) => (
-          <div key={comment.id} className="rounded-lg bg-slate-950/40 p-3 text-sm">
+          <div key={comment.id} className="rounded-lg bg-slate-50 p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-slate-200">
+              <span className="font-medium text-slate-700">
                 {comment.author.name ?? 'Member'}
               </span>
               {comment.author.id === user?.id && (
                 <button
                   type="button"
                   onClick={() => deleteMutation.mutate(comment.id)}
-                  className="text-xs text-rose-400 hover:text-rose-300"
+                  className="text-xs text-rose-600 hover:text-rose-500"
                 >
                   Delete
                 </button>
               )}
             </div>
-            <p className="mt-1 text-slate-300">{comment.content}</p>
+            <p className="mt-1 text-slate-600">{comment.content}</p>
           </div>
         ))
       )}
@@ -97,7 +97,7 @@ function CommentThread({ postId }: CommentThreadProps) {
         <input
           type="text"
           placeholder="Add a comment..."
-          className="flex-1 rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 focus:border-sky-400 focus:outline-none"
+          className="flex-1 rounded-lg border border-slate-200/70 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:border-teal-500 focus:outline-none"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           maxLength={1000}
@@ -141,15 +141,15 @@ export function PostCard({ post }: PostCardProps) {
         <div>
           <Link
             to={`/users/${post.author.id}`}
-            className="font-medium text-slate-100 hover:text-sky-300"
+            className="font-medium text-slate-900 hover:text-teal-600"
           >
             {post.author.name ?? 'Member'}
           </Link>
-          <p className="text-xs text-slate-400">{formatPostTime(post.createdAt)}</p>
+          <p className="text-xs text-slate-500">{formatPostTime(post.createdAt)}</p>
         </div>
         <Badge>{post.author.role}</Badge>
       </div>
-      <p className="mt-3 whitespace-pre-wrap text-sm text-slate-200">{post.content}</p>
+      <p className="mt-3 whitespace-pre-wrap text-sm text-slate-700">{post.content}</p>
       <div className="mt-4 flex items-center gap-4 text-sm">
         <button
           type="button"
@@ -157,8 +157,8 @@ export function PostCard({ post }: PostCardProps) {
           disabled={likeMutation.isPending}
           className={
             post.likedByMe
-              ? 'font-medium text-sky-300 hover:text-sky-200'
-              : 'text-slate-300 hover:text-white'
+              ? 'font-medium text-teal-600 hover:text-teal-700'
+              : 'text-slate-600 hover:text-white'
           }
         >
           {post.likedByMe ? 'Liked' : 'Like'} ({post.likesCount})
@@ -166,7 +166,7 @@ export function PostCard({ post }: PostCardProps) {
         <button
           type="button"
           onClick={() => setShowComments((prev) => !prev)}
-          className="text-slate-300 hover:text-white"
+          className="text-slate-600 hover:text-white"
         >
           {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
         </button>
@@ -220,12 +220,12 @@ export default function FeedPage() {
           <textarea
             rows={3}
             placeholder="Share a win, ask for advice, or cheer someone on..."
-            className="w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none"
+            className="w-full rounded-lg border border-slate-200/70 bg-slate-50 px-3 py-2 text-slate-900 focus:border-teal-500 focus:outline-none"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             maxLength={2000}
           />
-          {postError && <p className="text-sm text-rose-400">{postError}</p>}
+          {postError && <p className="text-sm text-rose-600">{postError}</p>}
           <Button type="submit" disabled={createMutation.isPending || !draft.trim()}>
             {createMutation.isPending ? 'Posting...' : 'Post'}
           </Button>
@@ -252,13 +252,13 @@ export default function FeedPage() {
       </div>
 
       {feedQuery.isLoading ? (
-        <p className="text-slate-300">Loading...</p>
+        <p className="text-slate-600">Loading...</p>
       ) : feedQuery.isError ? (
-        <p className="text-sm text-rose-400">
+        <p className="text-sm text-rose-600">
           {getErrorMessage(feedQuery.error, 'Unable to load the feed')}
         </p>
       ) : posts.length === 0 ? (
-        <p className="text-slate-300">
+        <p className="text-slate-600">
           {scope === 'following'
             ? 'No posts yet from people you follow.'
             : 'No posts yet. Be the first to share something.'}
