@@ -17,8 +17,8 @@ import {
 import { EXPERT_ROLES, type AvailabilitySlot, type ExpertProfile } from '../types/expert';
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-white/10 bg-slate-950/60 px-3 py-2 text-slate-100 focus:border-sky-400 focus:outline-none';
-const labelClass = 'block text-sm font-medium text-slate-300';
+  'mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 transition-colors focus:border-teal-500 focus:bg-white focus:outline-none';
+const labelClass = 'block text-sm font-medium text-slate-600';
 
 function formatSlotTime(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -85,7 +85,7 @@ function ProfileEditor() {
 
   return (
     <Card>
-      <h2 className="text-lg font-semibold text-slate-200">Your public profile</h2>
+      <h2 className="text-lg font-semibold text-slate-700">Your public profile</h2>
       <form
         onSubmit={handleSubmit((values) => saveMutation.mutate(values))}
         className="mt-4 space-y-4"
@@ -98,7 +98,7 @@ function ProfileEditor() {
             </label>
             <input id="specialty" className={inputClass} {...register('specialty')} />
             {errors.specialty && (
-              <p className="mt-1 text-sm text-rose-400">{errors.specialty.message}</p>
+              <p className="mt-1 text-sm text-rose-600">{errors.specialty.message}</p>
             )}
           </div>
           <div>
@@ -107,7 +107,7 @@ function ProfileEditor() {
             </label>
             <input id="focusArea" className={inputClass} {...register('focusArea')} />
             {errors.focusArea && (
-              <p className="mt-1 text-sm text-rose-400">{errors.focusArea.message}</p>
+              <p className="mt-1 text-sm text-rose-600">{errors.focusArea.message}</p>
             )}
           </div>
         </div>
@@ -116,7 +116,7 @@ function ProfileEditor() {
             Bio
           </label>
           <textarea id="bio" rows={4} className={inputClass} {...register('bio')} />
-          {errors.bio && <p className="mt-1 text-sm text-rose-400">{errors.bio.message}</p>}
+          {errors.bio && <p className="mt-1 text-sm text-rose-600">{errors.bio.message}</p>}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -138,19 +138,19 @@ function ProfileEditor() {
               {...register('yearsExperience', { valueAsNumber: true })}
             />
             {errors.yearsExperience && (
-              <p className="mt-1 text-sm text-rose-400">{errors.yearsExperience.message}</p>
+              <p className="mt-1 text-sm text-rose-600">{errors.yearsExperience.message}</p>
             )}
           </div>
         </div>
-        <label className="flex items-center gap-2 text-sm text-slate-300">
+        <label className="flex items-center gap-2 text-sm text-slate-600">
           <input type="checkbox" {...register('isAcceptingBookings')} />
           Currently accepting bookings
         </label>
-        {serverError && <p className="text-sm text-rose-400">{serverError}</p>}
+        {serverError && <p className="text-sm text-rose-600">{serverError}</p>}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+          className="rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
         >
           {isSubmitting ? 'Saving...' : 'Save profile'}
         </button>
@@ -209,7 +209,7 @@ function SlotManager() {
 
   return (
     <Card>
-      <h2 className="text-lg font-semibold text-slate-200">Availability slots</h2>
+      <h2 className="text-lg font-semibold text-slate-700">Availability slots</h2>
       <form
         onSubmit={handleSubmit((values) => createMutation.mutate(values))}
         className="mt-4 grid gap-4 sm:grid-cols-3"
@@ -226,7 +226,7 @@ function SlotManager() {
             {...register('startsAt')}
           />
           {errors.startsAt && (
-            <p className="mt-1 text-sm text-rose-400">{errors.startsAt.message}</p>
+            <p className="mt-1 text-sm text-rose-600">{errors.startsAt.message}</p>
           )}
         </div>
         <div>
@@ -239,39 +239,39 @@ function SlotManager() {
             className={inputClass}
             {...register('endsAt')}
           />
-          {errors.endsAt && <p className="mt-1 text-sm text-rose-400">{errors.endsAt.message}</p>}
+          {errors.endsAt && <p className="mt-1 text-sm text-rose-600">{errors.endsAt.message}</p>}
         </div>
         <div className="flex items-end">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-sky-500 px-4 py-2 font-semibold text-slate-950 transition-colors hover:bg-sky-400 disabled:opacity-60"
+            className="w-full rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition-all hover:shadow-md hover:shadow-teal-600/30 disabled:opacity-60"
           >
             Add slot
           </button>
         </div>
       </form>
-      {serverError && <p className="mt-2 text-sm text-rose-400">{serverError}</p>}
+      {serverError && <p className="mt-2 text-sm text-rose-600">{serverError}</p>}
 
       {slotsQuery.isLoading ? (
-        <p className="mt-4 text-sm text-slate-300">Loading...</p>
+        <p className="mt-4 text-sm text-slate-600">Loading...</p>
       ) : slots.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-300">No slots yet.</p>
+        <p className="mt-4 text-sm text-slate-600">No slots yet.</p>
       ) : (
         <ul className="mt-4 space-y-2">
           {slots.map((slot) => (
             <li
               key={slot.id}
-              className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-950/40 p-4 text-sm"
+              className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50 p-4 text-sm"
             >
-              <span className="text-slate-200">{formatSlotTime(slot.startsAt, slot.endsAt)}</span>
+              <span className="text-slate-700">{formatSlotTime(slot.startsAt, slot.endsAt)}</span>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400">{slot.status}</span>
+                <span className="text-xs text-slate-500">{slot.status}</span>
                 {slot.status === 'OPEN' && (
                   <button
                     type="button"
                     onClick={() => deleteMutation.mutate(slot.id)}
-                    className="text-sm text-rose-400 hover:text-rose-300"
+                    className="text-sm text-rose-600 hover:text-rose-500"
                   >
                     Remove
                   </button>
@@ -291,7 +291,7 @@ export default function ExpertDashboardPage() {
   if (!user || !EXPERT_ROLES.includes(user.role as (typeof EXPERT_ROLES)[number])) {
     return (
       <Card>
-        <p className="text-slate-300">
+        <p className="text-slate-600">
           This page is only available to registered experts (nutritionists, doctors, and coaches).
         </p>
       </Card>
