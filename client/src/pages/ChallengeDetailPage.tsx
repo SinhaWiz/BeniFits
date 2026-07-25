@@ -40,7 +40,7 @@ export default function ChallengeDetailPage() {
   });
 
   if (leaderboardQuery.isLoading) {
-    return <p className="text-center text-slate-300">Loading leaderboard...</p>;
+    return <p className="text-center text-slate-600">Loading leaderboard...</p>;
   }
 
   const data = leaderboardQuery.data;
@@ -52,39 +52,39 @@ export default function ChallengeDetailPage() {
     <div className="space-y-8">
       <Card>
         <h1 className="text-2xl font-bold">{challenge.title}</h1>
-        <p className="mt-2 text-sm text-slate-400">{challenge.description}</p>
+        <p className="mt-2 text-sm text-slate-500">{challenge.description}</p>
         <p className="mt-2 text-xs text-slate-500">
           {formatDate(challenge.startsAt)} &ndash; {formatDate(challenge.endsAt)}
         </p>
       </Card>
 
       <Card>
-        <h2 className="text-lg font-semibold text-slate-200">Leaderboard</h2>
+        <h2 className="text-lg font-semibold text-slate-700">Leaderboard</h2>
         {leaderboard.length === 0 ? (
-          <p className="mt-4 text-slate-300">No one has joined this challenge yet.</p>
+          <p className="mt-4 text-slate-600">No one has joined this challenge yet.</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-slate-400">
+              <thead className="text-slate-500">
                 <tr>
                   <th className="pb-2 pr-4">Rank</th>
                   <th className="pb-2 pr-4">Participant</th>
                   <th className="pb-2 pr-4">Progress</th>
                 </tr>
               </thead>
-              <tbody className="text-slate-200">
+              <tbody className="text-slate-700">
                 {leaderboard.map((entry) => (
                   <tr
                     key={entry.userId}
-                    className={`border-t border-white/5 ${
-                      entry.userId === user?.id ? 'bg-sky-500/10' : ''
+                    className={`border-t border-slate-100 ${
+                      entry.userId === user?.id ? 'bg-teal-50' : ''
                     }`}
                   >
                     <td className="py-2 pr-4">#{entry.rank}</td>
                     <td className="py-2 pr-4">
                       {entry.name ?? 'Anonymous'}
                       {entry.userId === user?.id && (
-                        <span className="ml-2 text-xs text-sky-400">(you)</span>
+                        <span className="ml-2 text-xs text-teal-600">(you)</span>
                       )}
                     </td>
                     <td className="py-2 pr-4">
